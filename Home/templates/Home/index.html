@@ -222,12 +222,13 @@
       card_class_list = Array.from(card_el.classList);
       card_category_identifier = card_class_list.at(-1);
       
+      category_all_challenge_completed();
 
       amount_completed_el = document.getElementById('card-count-' + String(card_number));
       amount_completed = amount_completed_el.textContent.split('/');
       total_completed = Number(amount_completed.at(0));
       max_completed = Number(amount_completed.at(1));
-      category_all_challenge_completed();
+      
       if (total_completed < max_completed - 1){
         amount_completed_el.textContent = String(total_completed+1)+'/'+String(max_completed);
       }
