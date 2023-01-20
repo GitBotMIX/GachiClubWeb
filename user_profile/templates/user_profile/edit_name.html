@@ -1,0 +1,22 @@
+{% extends "Home/base.html" %}
+{% load static %}
+{% block title %}
+    Edit name
+{% endblock %}
+{% block content %}
+  <div class="container-fluid d-flex justify-content-center" style="position: absolute; width: 100%; height: 100%; left: 0px; overflow: hidden; align-items: center; flex-direction: column;">
+
+    <form action="{% url 'user_profile:edit_name' %}" method="post">
+      
+      <div class="form-group">
+        <input name="first_name" class="form-control form-control-lg" type="text" placeholder="Имя" id="inputLarge">
+      </div>
+      <div class="form-group">
+        <input name="last_name" class="form-control form-control-lg" type="text" placeholder="Фамилия" id="inputLarge">
+      </div>
+        <button type="submit" class="btn btn-secondary" style="margin-top: 10px;">Изменить имя/фамилию</button>
+        {% csrf_token %}
+    </form>
+
+  </div>
+{% endblock %}

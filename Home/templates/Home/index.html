@@ -1,0 +1,389 @@
+{% extends "Home/base.html" %}
+{% load static %}
+{% block title %}
+    Gachi Club
+{% endblock %}
+
+
+
+{% block content %}
+<div class="main-block" style="background-image: url({% static 'Home/img/gachi_simbol.png' %});"></div>
+<div class="container">
+  <div class="container row d-flex justify-content-center" style="margin: 0px; padding: 0px; width: 100%;">
+    <div class="content col-12 col-sm-12 col-md-12 col-lg-6" style="padding: 0px">
+      <div class="container rating">
+        <div class="card text-white bg-danger border-primary mb-3">
+          <h3 class="card-header">Gachi Cup</h3>
+          {% if gift %}
+            {% if gift.unblocked %}
+              <div class="card-body">
+                <h5 class="card-title">Главный приз</h5>
+                <h6 class="card-subtitle text-warning">{{ gift.name }}</h6>
+              </div>
+              <img src="{{ gift.image.url }}" width="100%" height="200px" alt="Приз">
+            {% else %}
+              <div class="card-body">
+                <h5 class="card-title">Главный приз</h5>
+                <h6 class="card-subtitle text-warning" style="filter: blur(4px);">??? ???????? ?????? ???????</h6>
+              </div>
+              <h1 id="timer" class="timer">00:00:00:00</h1>
+              <img src="{% static 'Home/img/locked.png' %}" style="filter: blur(5px);" width="100%" height="200px" alt="Приз">
+            {% endif %}
+          {% else %}
+            <div class="card-body">
+              <h5 class="card-title">Главный приз</h5>
+              <h6 class="card-subtitle text-warning" style="filter: blur(4px);">??? ???????? ?????? ???????</h6>
+            </div>
+            <img src="{% static 'Home/img/locked.png' %}" style="filter: blur(5px);" width="100%" height="200px" alt="Приз">
+          {% endif %}
+
+
+          <ul id="users_rating" class="list-group">
+
+          </ul>
+
+
+        </div>
+      </div>
+      <div class="container content card text-white bg-white border-primary mb-3" style="padding: 5px;">
+
+        <div class="container category d-flex card text-white bg-white border-primary mb-3" style="flex-direction: row; padding: 10px; flex-wrap: wrap;">
+          <button id="category-button-all" onclick="category_visibility('challenge')" type="button" class="btn btn-light active">Все</button>
+          {% if categories %}
+            {% for category in categories %}
+              <button id="category-button-{{ category.name }}" onclick="category_visibility('identifier-{{ category.name }}', this)" type="button" class="btn text-white" style="background-color: {{ category.color }};">{{ category.name }}</button>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <div id="container-challenges" class="container challenges">
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2">
+                {% if quests %}
+                  {% for quest in quests %}
+                    {% if gift %}
+                      {% if quest.user_completion != quest.amount_available_user %}
+                        
+                        <article id="card-{{ forloop.counter }}" class="challenge col d-flex justify-content-center identifier-{{ quest.category.name }}">
+                          <div class="card text-white mb-3" style="width: 20rem; background-color: {{ quest.category.color }};">
+                            <div class="card-header d-flex">
+                              <div class="reward">{{ quest.reward }} BUCKS</div>
+                              <div class="container-fluid d-flex justify-content-end container-complexity">
+                                <div class="container-fluid d-flex justify-content-end container-complexity">
+                                  <span class="badge rounded-pill complexity hide">{{ quest.complexity }}</span>
+                                </div>
+                                <span id="card-count-{{ forloop.counter }}" class="badge bg-light mr-5">
+                                  {{ quest.user_completion }}/{{ quest.amount_available_user }}
+                                </span>
+                              </div>
+                            </div>
+                        {% if gift.unblocked %}
+                            <div class="card-body ">
+                              <h4 class="card-title challenge-title">{{ quest.title }}</h4>
+                              <p class="card-text challenge-description">{{ quest.description }}</p>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                              <button id="card-button-{{ forloop.counter }}" type="button" onclick="perform_task('{{ user.id }}', '{{ quest.id }}', this, {{ quest.reward }})" class="btn btn-light">Выполнить</button>
+                            </div>  
+                          </div>
+                        </article>
+                        {% else %}
+                            <div class="card-body ">
+                              <h4 class="card-title challenge-title">{{ quest.title }}</h4>
+                              <p class="card-text quest-blur text-blur challenge-description">Сдесь храниться описание задания, больше не льзь сюда, мамкин ты хацкер</p>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                              <button type="button" class="btn btn-light active">Выполнить</button>
+                            </div>  
+                          </div>
+                        </article>
+                        {% endif %}
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <h1>Пока заданий нету</h1>
+                {% endif %}
+              
+            <article class="challenge-hide col d-flex justify-content-center">
+              <div class="card border-light mb-3" style="width: 20rem;">
+                <div class="card-body">
+                  <h4 class="card-title"></h4>
+                  <p class="card-text"></p>
+                </div>
+              </div>
+            </article>
+            <article class="challenge-hide col d-flex justify-content-center">
+              <div class="card border-light mb-3" style="width: 20rem;">
+                <div class="card-body">
+                  <h4 class="card-title"></h4>
+                  <p class="card-text"></p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block js %}
+  <script>
+    var current_sellect_category = document.getElementById('category-button-all');
+
+    function on_success_execute_quest() {
+
+    };
+
+    function update_rating(){
+      $.ajax({
+          type: "POST",
+          url: 'get_rating/',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(response) {
+              rating_arr_all = response.response
+              users_rating = document.getElementById('users_rating');
+              users_rating.replaceChildren();
+              for (let i = 0; i <= rating_arr_all.length - 1; i++) {
+                rating_arr = rating_arr_all[i];
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+
+                const name = document.createTextNode(rating_arr['user__first_name'] + ' ' + rating_arr['user__last_name']);
+                listItem.appendChild(name);
+
+                const badge = document.createElement("span");
+                badge.className = "badge bg-primary rounded-pill";
+                const badgeText = document.createTextNode(rating_arr['points']);
+                badge.appendChild(badgeText);
+                listItem.appendChild(badge);
+                users_rating.appendChild(listItem);
+              }
+
+              
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      });
+    };
+
+
+    function existence_check_cards_from_category(identifier) {
+      console.log(identifier);
+      console.log(current_sellect_category.id);
+      
+      all_categoty_cards_len = document.querySelectorAll('.'+ identifier).length;
+      if (all_categoty_cards_len == 0) {
+        if (current_sellect_category.id == 'category-button-all'){
+          if (document.querySelectorAll('.challenge').length == 0) {
+            category_all_challenge_completed();
+          } else{
+            return false
+          }
+        } else {
+          category_all_challenge_completed();
+          return true
+        }
+      
+
+      } else {
+        return false
+      };
+
+    };
+
+
+    function category_all_challenge_completed(){
+
+      container_challenges_el = document.getElementById('container-challenges');
+      var inscription_successful_completion_all_tasks = document.createElement("div");
+      inscription_successful_completion_all_tasks.innerHTML = `
+      Все задания категории успешно выполнены
+      <img src="{% static 'Home/img/challenge_success.jpg' %}" alt="">
+      `;
+      inscription_successful_completion_all_tasks.id = "inscription-successful-completion-all-tasks";
+      inscription_successful_completion_all_tasks.style.color = "green";
+      inscription_successful_completion_all_tasks.style.textAlign = "center";
+      container_challenges_el.prepend(inscription_successful_completion_all_tasks);
+    };
+
+    function update_amount_completed_quest (quest_count_el){
+      card_number = quest_count_el.id.split('-').at(-1);
+      card_el = document.getElementById('card-' + String(card_number));
+      card_class_list = Array.from(card_el.classList);
+      card_category_identifier = card_class_list.at(-1)
+      
+
+      amount_completed_el = document.getElementById('card-count-' + String(card_number));
+      amount_completed = amount_completed_el.textContent.split('/');
+      total_completed = Number(amount_completed.at(0));
+      max_completed = Number(amount_completed.at(1));
+      if (total_completed < max_completed - 1){
+        amount_completed_el.textContent = String(total_completed+1)+'/'+String(max_completed);
+      }
+      else {
+        card_el.remove();
+        
+        existence_check_cards_from_category(card_category_identifier)
+      };
+    };
+
+    function perform_task(user_id, quest_id, quest_count_el, quest_reward){
+        // var url = 'perform_task/';
+        // var method = 'POST';
+        // var data = JSON.stringify({'data': 'example_data'});
+        // makeAjaxRequest(url, method, data);
+      $.ajax({
+          type: "POST",
+          url: 'perform_task/',
+          data: {'user_id': user_id, 'quest_id': quest_id, 'points': quest_reward},
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          dataType: 'json',
+          success: function(response) {
+              console.log(response.status);
+              update_amount_completed_quest(quest_count_el);
+              update_rating();
+              
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      });
+    };
+
+
+
+
+
+    const search_challenge_input = document.getElementById('search-challenge');
+
+    search_challenge_input.addEventListener('input', (event) => {
+      search_challenge()
+    });
+    function search_challenge(){
+
+      all_challenges = document.querySelectorAll('.challenge');
+      all_challenges.forEach(element => {
+        element_title = element.querySelector('.challenge-title');
+        element_description = element.querySelector('.challenge-description');
+        if (element_title.textContent.toLowerCase().includes(search_challenge_input.value.toLowerCase()) || element_description.textContent.toLowerCase().includes(search_challenge_input.value.toLowerCase())){
+          element.classList.remove('hide');
+        }
+        else{
+          element.classList.add('hide');
+        };
+      });
+    
+    };
+    get_challenges_complexity();
+    function get_challenges_complexity() {
+      elComplexity = document.querySelectorAll('.complexity');
+      
+      elComplexity.forEach(element => {
+        if (element.textContent == '0'){
+          element.innerHTML = `Легко`;
+          element.classList.add('bg-success');
+        }
+        if (element.textContent == '1'){
+          element.innerHTML = `Средне`;
+          element.classList.add('bg-warning');
+        }
+        if (element.textContent == '2'){
+          element.innerHTML = `Сложно`;
+          element.classList.add('bg-danger');
+        }
+        element.classList.remove('hide');
+      });
+    };
+
+
+    function category_visibility(identifier, category_button) {
+      old_inscription_successful_completion_all_tasks_el = document.getElementById('inscription-successful-completion-all-tasks');
+      if (category_button) {
+        current_sellect_category = document.getElementById(identifier.replace('identifier-', 'category-button-'));
+      }
+      else {
+        current_sellect_category = document.getElementById('category-button-all');
+      }
+      
+
+      if (old_inscription_successful_completion_all_tasks_el) {
+        old_inscription_successful_completion_all_tasks_el.remove();
+      }
+      
+      existence_check_cards_from_category(identifier);
+
+      try{old_category_button.classList.remove('active');}
+      catch{};
+      
+      
+      try{category_button.classList.add('active');}
+      catch{};
+      
+      
+      const elementWithCategory = document.querySelectorAll('.' + identifier);
+      
+      const elementWithOutCategory = document.querySelectorAll('.challenge');
+      
+      elementWithOutCategory.forEach(element => {
+        element.classList.add('hide');
+      });
+      elementWithCategory.forEach(element => {
+        element.classList.remove('hide');
+      });
+      old_category_button = category_button;  
+    }
+
+    var old_category_button = document.getElementById('show-all-challenge');
+    let secondsToUnlockGift = Number({{ gift.unblocked_via }});
+    let timerShow = document.getElementById("timer");
+    
+    
+    timer = setInterval(function () {
+        let seconds = secondsToUnlockGift; 
+        
+        //days 
+        let days = Math.floor(seconds/(86400)); 
+        seconds -= days*86400; 
+        
+        //hours 
+        let hours = Math.floor(seconds/3600); 
+        seconds -= hours*3600; 
+        
+        //minutes 
+        let minutes = Math.floor(seconds/60); 
+        seconds -= minutes*60; 
+            
+        //output 
+        //console.log(`${days > 9 ? days : '0' + days}:${hours > 9 ? hours : '0' + hours}:${minutes > 9 ? minutes : '0' + minutes}:${seconds > 9 ? seconds : '0' + seconds}`); 
+        // Условие если время закончилось то...
+        if (secondsToUnlockGift <= 0) {
+            // Таймер удаляется
+            clearInterval(timer);
+            // Выводит сообщение что время закончилось
+        } else { // Иначе
+            // Создаём строку с выводом времени
+            let strTimer = `${days > 9 ? days : '0' + days}:${hours > 9 ? hours : '0' + hours}:${minutes > 9 ? minutes : '0' + minutes}:${seconds > 9 ? seconds : '0' + seconds}`;
+            // Выводим строку в блок для показа таймера
+            timerShow.innerHTML = strTimer;
+        };
+        --secondsToUnlockGift; // Уменьшаем таймер
+    }, 1000);
+    window.addEventListener('load', function() {
+        update_rating();
+        setInterval(function() {
+            update_rating();
+        }, 5000);
+    });
+  </script>
+{% endblock %}
