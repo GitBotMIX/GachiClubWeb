@@ -216,10 +216,11 @@
     };
 
     function update_amount_completed_quest (quest_count_el){
+      category_all_challenge_completed();
       card_number = quest_count_el.id.split('-').at(-1);
       card_el = document.getElementById('card-' + String(card_number));
       card_class_list = Array.from(card_el.classList);
-      card_category_identifier = card_class_list.at(-1)
+      card_category_identifier = card_class_list.at(-1);
       
 
       amount_completed_el = document.getElementById('card-count-' + String(card_number));
@@ -241,8 +242,6 @@
         // var method = 'POST';
         // var data = JSON.stringify({'data': 'example_data'});
         // makeAjaxRequest(url, method, data);
-        update_amount_completed_quest(quest_count_el);
-        update_rating();
       $.ajax({
           type: "POST",
           url: 'perform_task/',
@@ -252,7 +251,9 @@
           },
           dataType: 'json',
           success: function(response) {
-            console.log(response);
+              console.log(response.status);
+              update_amount_completed_quest(quest_count_el);
+              update_rating();
               
           },
           error: function(error) {
