@@ -216,10 +216,12 @@
     };
 
     function update_amount_completed_quest (quest_count_el){
-      category_all_challenge_completed();
       
-      card_number = quest_count_el.id.split('-').at(-1);
-      card_el = document.getElementById('card-' + String(card_number));
+
+      var card_number = quest_count_el.id.split('-').at(-1);
+      var card_el = document.getElementById('card-' + String(card_number));
+
+      category_all_challenge_completed();
       
       card_class_list = Array.from(card_el.classList);
       card_category_identifier = card_class_list.at(-1);
