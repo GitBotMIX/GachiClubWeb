@@ -219,10 +219,11 @@
       
       card_number = quest_count_el.id.split('-').at(-1);
       card_el = document.getElementById('card-' + String(card_number));
+      category_all_challenge_completed();
       card_class_list = Array.from(card_el.classList);
       card_category_identifier = card_class_list.at(-1);
+
       
-      category_all_challenge_completed();
 
       amount_completed_el = document.getElementById('card-count-' + String(card_number));
       amount_completed = amount_completed_el.textContent.split('/');
