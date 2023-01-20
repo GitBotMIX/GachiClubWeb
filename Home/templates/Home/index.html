@@ -379,11 +379,11 @@
         };
         --secondsToUnlockGift; // Уменьшаем таймер
     }, 1000);
-    // window.addEventListener('load', function() {
-    //     update_rating();
-    //     setInterval(function() {
-    //         update_rating();
-    //     }, 5000);
-    // });
+    window.addEventListener('load', function() {
+        update_rating();
+        setInterval(function() {
+            update_rating();
+        }, 5000);
+    });
   </script>
 {% endblock %}
