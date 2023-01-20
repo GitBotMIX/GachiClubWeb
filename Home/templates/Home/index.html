@@ -241,6 +241,8 @@
         // var method = 'POST';
         // var data = JSON.stringify({'data': 'example_data'});
         // makeAjaxRequest(url, method, data);
+        update_amount_completed_quest(quest_count_el);
+        update_rating();
       $.ajax({
           type: "POST",
           url: 'perform_task/',
@@ -250,8 +252,7 @@
           },
           dataType: 'json',
           success: function(response) {
-              update_amount_completed_quest(quest_count_el);
-              update_rating();
+            console.log(response);
               
           },
           error: function(error) {
