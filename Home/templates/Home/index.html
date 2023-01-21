@@ -218,20 +218,20 @@
     function update_amount_completed_quest (quest_count_el){
       
 
-      var card_number = quest_count_el.id.split('-').slice(-1)[0];;
+      var card_number = quest_count_el.id.split('-').slice(-1)[0];
       var card_el = document.getElementById('card-' + String(card_number));
 
-      category_all_challenge_completed();
+      
       
       card_class_list = Array.from(card_el.classList);
-      card_category_identifier = card_class_list.at(-1);
+      card_category_identifier = card_class_list.slice(-1)[0];
       
-      
+      category_all_challenge_completed();
 
       amount_completed_el = document.getElementById('card-count-' + String(card_number));
       amount_completed = amount_completed_el.textContent.split('/');
-      total_completed = Number(amount_completed.at(0));
-      max_completed = Number(amount_completed.at(1));
+      total_completed = Number(amount_completed.slice(0)[0]);
+      max_completed = Number(amount_completed.slice(1)[0]);
       
       if (total_completed < max_completed - 1){
         amount_completed_el.textContent = String(total_completed+1)+'/'+String(max_completed);
