@@ -68,7 +68,7 @@
               <p class="card-text">
                 {% if categories %}
                   {% for category in categories %}
-                    <button id="category-button-{{ category.name }}" onclick="category_visibility('identifier-{{ category.name }}', this)" type="button" class="btn text-white" style="background-color: {{ category.color }}; width: 90px;">{{ category.name }}</button>
+                    <button id="category-button-{{ category.name }}" onclick="category_visibility('identifier-{{ category.name }}', this)" type="button" class="btn text-white" style="background-color: {{ category.color }}; min-width: 80px; max-width: 100px;">{{ category.name }}</button>
                   {% endfor %}
                 {% endif %}
               </p>
