@@ -220,14 +220,10 @@
 
       var card_number = quest_count_el.id.split('-').slice(-1)[0];
       var card_el = document.getElementById('card-' + String(card_number));
-
-      
       
       card_class_list = Array.from(card_el.classList);
       card_category_identifier = card_class_list.slice(-1)[0];
       
-      category_all_challenge_completed();
-
       amount_completed_el = document.getElementById('card-count-' + String(card_number));
       amount_completed = amount_completed_el.textContent.split('/');
       total_completed = Number(amount_completed.slice(0)[0]);
