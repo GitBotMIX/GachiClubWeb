@@ -218,14 +218,14 @@
     function update_amount_completed_quest (quest_count_el){
       
 
-      var card_number = quest_count_el.id.split('-')[quest_count_el.id.split('-').length - 1];
+      var card_number = quest_count_el.id.split('-').slice(-1)[0];;
       var card_el = document.getElementById('card-' + String(card_number));
 
-      
+      category_all_challenge_completed();
       
       card_class_list = Array.from(card_el.classList);
       card_category_identifier = card_class_list.at(-1);
-      category_all_challenge_completed();
+      
       
 
       amount_completed_el = document.getElementById('card-count-' + String(card_number));
