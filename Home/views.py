@@ -54,3 +54,26 @@ def get_rating(request):
     if request.method == 'POST':
         users_rating = UserProfile.objects.get_ranking()
         return JsonResponse({'response': list(users_rating.values('user__first_name', 'user__last_name', 'points'))})
+
+
+def completed_tasks(request):
+    if request.method == 'POST':
+        pass
+    else:
+        if request.user.is_authenticated:
+            user_quests = UserQuests.objects.filter(user=request.user)
+            added_quests = []
+            # user_quests = UserQuests.objects.filter(user=request.user, quest_completed=True).annotate(
+            #     user_completion=Count('user'))
+
+            # for user_quest in user_quests:
+            #     print(user_quest.user_completion)
+            for user_quest in user_quests:
+
+                if user_quest.quest_completed.id not in added_quests:
+                    print(user_quest.quest_completed.id)
+                    user_quest.user_completion = user_quests.filter(quest_completed=user_quest.quest_completed,
+                                                                           user=request.user).count()
+                    added_quests.append(user_quest.quest_completed.id)
+            return render(request, 'Home/completed_tasks.html', {'user_quests': user_quests})
+

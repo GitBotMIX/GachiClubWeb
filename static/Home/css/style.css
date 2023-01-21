@@ -82,3 +82,10 @@
     -webkit-user-select: none; 
     user-select: none; 
 }
+.card-header-category {
+    border-right: 2px solid red;
+    border-bottom: none;
+}
+.super-category{
+    width: 110px;
+}

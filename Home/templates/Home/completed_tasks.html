@@ -1,0 +1,41 @@
+{% extends "Home/base.html" %}
+{% load static %}
+{% block title %}
+    Gachi - Выполненные задания
+{% endblock %}
+
+
+{% block content %}
+<div class="main-block" style="background-image: url({% static 'Home/img/gachi_simbol.png' %});"></div>
+
+  {% if user_quests %}
+    {% for quest in user_quests %}
+      {% if quest.user_completion %}
+        <article id="card-{{ forloop.counter }}" class="challenge col d-flex justify-content-center identifier-{{ quest.category.name }}">
+          <div class="card text-white mb-3" style="width: 20rem; background-color: {{ quest.quest_completed.category.color }};">
+            <div class="card-header d-flex">
+              <div class="reward">{{ quest.quest_completed.reward }} BUCKS</div>
+              <div class="container-fluid d-flex justify-content-end container-complexity">
+                <div class="container-fluid d-flex justify-content-end container-complexity">
+                  <span class="badge rounded-pill complexity hide">{{ quest.quest_completed.complexity }}</span>
+                </div>
+                <span id="card-count-{{ forloop.counter }}" class="badge bg-light mr-5">
+                  {{ quest.user_completion }}/{{ quest.quest_completed.amount_available_user }}
+                </span>
+              </div>
+            </div>
+            <div class="card-body ">
+              <h4 class="card-title challenge-title">{{ quest.quest_completed.title }}</h4>
+              <p class="card-text challenge-description">{{ quest.quest_completed.description }}</p>
+            </div>
+            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+              <button id="card-button-{{ forloop.counter }}" type="button" onclick="perform_task('{{ quest.user.id }}', '{{ quest.quest_completed.id }}', this, {{ quest.reward }})" class="btn btn-light">Выполнить</button>
+            </div>  
+          </div>
+        </article>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+  {% endif %}
+
+{% endblock %}

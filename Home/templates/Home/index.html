@@ -7,7 +7,6 @@
 
 
 {% block content %}
-<div class="main-block" style="background-image: url({% static 'Home/img/gachi_simbol.png' %});"></div>
 <div class="container">
   <div class="container row d-flex justify-content-center" style="margin: 0px; padding: 0px; width: 100%;">
     <div class="content col-12 col-sm-12 col-md-12 col-lg-6" style="padding: 0px">
@@ -45,16 +44,37 @@
 
         </div>
       </div>
-      <div class="container content card text-white bg-white border-primary mb-3" style="padding: 5px;">
 
-        <div class="container category d-flex card text-white bg-white border-primary mb-3" style="flex-direction: row; padding: 10px; flex-wrap: wrap;">
-          <button id="category-button-all" onclick="category_visibility('challenge')" type="button" class="btn btn-light active">Все</button>
-          {% if categories %}
-            {% for category in categories %}
-              <button id="category-button-{{ category.name }}" onclick="category_visibility('identifier-{{ category.name }}', this)" type="button" class="btn text-white" style="background-color: {{ category.color }};">{{ category.name }}</button>
-            {% endfor %}
-          {% endif %}
-        </div>
+      <div class="container content card text-white bg-white border-primary mb-3" style="padding: 5px;">
+          <div class="card border-primary mb-3 d-flex" style="width: 100%; flex-direction: row; border: 0px; border-bottom: 2px solid black;">
+            <div class="card-header card-header-category border-right" style="border-bottom: 0px; padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x); max-width: 150px; border-radius: 3px 3px 0 0/100px 165px 0 0;">
+              <button style="" id="category-button-all" onclick="filter_all_challenge_visible()" type="button" class="btn btn-outline-secondary super-category">Все</button>
+              <button type="button" class="btn btn-outline-dark super-category" onclick="filter_completed_challenges()">Выполненные</button>
+
+              <div class="btn-group super-category" role="group" aria-label="Button group with nested dropdown">
+                <div class="btn-group" role="group">
+                  <button id="btnGroupDrop3" type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Сложность</button>
+                  <div class="dropdown-menu" aria-labelledby="btnGroupDrop3">
+                    <a class="dropdown-item" href="#">Сбросить</a>
+                    <a class="dropdown-item bg-success rounded-pill text-white" href="#">Легко</a>
+                    <a class="dropdown-item bg-warning rounded-pill text-white" href="#">Средне</a>
+                    <a class="dropdown-item bg-danger rounded-pill text-white" href="#">Сложно</a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div class="card-body">
+              <p class="card-text">
+                {% if categories %}
+                  {% for category in categories %}
+                    <button id="category-button-{{ category.name }}" onclick="category_visibility('identifier-{{ category.name }}', this)" type="button" class="btn text-white" style="background-color: {{ category.color }}; width: 90px;">{{ category.name }}</button>
+                  {% endfor %}
+                {% endif %}
+              </p>
+            </div>
+          </div>
+
 
         <div id="container-challenges" class="container challenges">
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2">
@@ -62,8 +82,14 @@
                   {% for quest in quests %}
                     {% if gift %}
                       {% if quest.user_completion != quest.amount_available_user %}
-                        
-                        <article id="card-{{ forloop.counter }}" class="challenge col d-flex justify-content-center identifier-{{ quest.category.name }}">
+                        {% if quest.user_completion != 0 %}
+                          <article id="card-{{ forloop.counter }}" class="challenge completed col d-flex justify-content-center identifier-{{ quest.category.name }}">
+                        {% else %}
+                          <article id="card-{{ forloop.counter }}" class="challenge col d-flex justify-content-center identifier-{{ quest.category.name }}">
+                        {% endif %}
+                      {% else %}
+                        <article id="card-{{ forloop.counter }}" class="challenge completed-full hide col d-flex justify-content-center identifier-{{ quest.category.name }}">
+                      {% endif %}
                           <div class="card text-white mb-3" style="width: 20rem; background-color: {{ quest.category.color }};">
                             <div class="card-header d-flex">
                               <div class="reward">{{ quest.reward }} BUCKS</div>
@@ -81,8 +107,8 @@
                               <h4 class="card-title challenge-title">{{ quest.title }}</h4>
                               <p class="card-text challenge-description">{{ quest.description }}</p>
                             </div>
-                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                              <button id="card-button-{{ forloop.counter }}" type="button" onclick="perform_task('{{ user.id }}', '{{ quest.id }}', this, {{ quest.reward }})" class="btn btn-light">Выполнить</button>
+                            <div id="quest-button-container" class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                              <button id="button-card-{{ forloop.counter }}" type="button" onclick="perform_task('{{ user.id }}', '{{ quest.id }}', this, {{ quest.reward }})" class="quest-button btn btn-light button_data={{ user.id }},{{ quest.id }},this,{{ quest.reward }}">Выполнить</button>
                             </div>  
                           </div>
                         </article>
@@ -97,7 +123,7 @@
                           </div>
                         </article>
                         {% endif %}
-                      {% endif %}
+                      
                     {% endif %}
                   {% endfor %}
                 {% else %}
@@ -135,6 +161,125 @@
 {% block js %}
   <script>
     var current_sellect_category = document.getElementById('category-button-all');
+
+    function el_add_remove_button(container_button_el, button_el, button_classList, button_data, card_number) {
+      user_id = button_data.slice(0)[0];
+      quest_id = button_data.slice(1)[0];
+      reward = button_data.slice(3)[0];
+
+      const button = document.createElement("button");
+      button.setAttribute("id", "button-card-" + card_number);
+      button.setAttribute("type", "button");
+      button.setAttribute("class", button_classList);
+      button.innerHTML = "Удалить";
+      button.onclick = function() {
+        delete_previously_completed_quest(user_id, quest_id, this, reward);
+      }
+
+      container_button_el.replaceChildren();
+      container_button_el.appendChild(button);
+    }
+
+    function get_button_challenge(element) {
+      container_button_el = element.querySelector('#quest-button-container');
+      button_el = element.querySelector('.quest-button');
+      card_number = button_el.id.split('-').slice(-1)[0];
+      
+      button_classList = button_el.classList;
+      button_data = button_classList.value.split('=').slice(-1)[0].split(',');
+      return [container_button_el, button_el, button_classList, button_data, card_number]
+      
+    }
+
+    function el_add_execute_button(container_button_el, button_el, button_classList, button_data, card_number) {
+      user_id = button_data.slice(0)[0];
+      quest_id = button_data.slice(1)[0];
+      reward = button_data.slice(3)[0];
+
+      const button = document.createElement("button");
+      button.setAttribute("id", "button-card-" + card_number);
+      button.setAttribute("type", "button");
+      button.setAttribute("class", button_classList);
+      button.innerHTML = "Выполнить";
+      button.onclick = function() {
+        perform_task(user_id, quest_id, this, reward);
+      }
+
+      container_button_el.replaceChildren();
+      container_button_el.appendChild(button);
+    }
+
+    function all_full_completed_challenge(hide=true) {
+      all_full_completed_challenges = document.querySelectorAll('.completed-full');
+      if (hide) {
+        all_full_completed_challenges.forEach(element => {
+          element.classList.add('hide');
+          
+        });
+
+      } else {
+          all_full_completed_challenges.forEach(element => {
+            element.classList.remove('hide');
+            button_challenge = get_button_challenge(element);
+            el_add_remove_button(button_challenge[0], button_challenge[1], button_challenge[2], button_challenge[3], button_challenge[4]);
+          });
+
+      }
+    }
+
+    function all_completed_challenge(hide=true, delete_button=true) {
+      all_completed_challenges = document.querySelectorAll('.completed');
+      if (hide) {
+        console.log('suc')
+        all_completed_challenges.forEach(element => {
+          element.classList.add('hide');
+          button_challenge = get_button_challenge(element);
+          el_add_execute_button(button_challenge[0], button_challenge[1], button_challenge[2], button_challenge[3], button_challenge[4]);
+
+        
+        });
+      } else {
+        
+        all_completed_challenges.forEach(element => {
+          element.classList.remove('hide');
+          button_challenge = get_button_challenge(element);
+          if (delete_button){
+            el_add_remove_button(button_challenge[0], button_challenge[1], button_challenge[2], button_challenge[3], button_challenge[4]);
+          } else {
+            el_add_execute_button(button_challenge[0], button_challenge[1], button_challenge[2], button_challenge[3], button_challenge[4]);
+          }
+          
+        
+        });
+      }
+
+    }
+
+    function all_challenges(hide=true) {
+      all_challenge = document.querySelectorAll('.challenge');
+      if (hide) {
+        all_challenge.forEach(element => {
+        element.classList.add('hide');
+        });
+      } else {
+        all_challenge.forEach(element => {
+        element.classList.remove('hide');
+        });
+      }
+
+    }
+    function filter_all_challenge_visible() {
+      all_challenges(hide=false);
+      all_completed_challenge(hide=false, delete_button=false);
+      all_full_completed_challenge(hide=true);
+    }
+
+
+    function filter_completed_challenges() {
+      all_challenges(hide=true);
+      all_completed_challenge(hide=false, delete_button=true);
+      all_full_completed_challenge(hide=false);
+    };
 
     function on_success_execute_quest() {
 
@@ -217,7 +362,7 @@
 
     function update_amount_completed_quest (quest_count_el){
       
-
+      console.log(quest_count_el);
       var card_number = quest_count_el.id.split('-').slice(-1)[0];
       var card_el = document.getElementById('card-' + String(card_number));
       
