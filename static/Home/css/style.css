@@ -53,11 +53,13 @@
     background-color: #ffffff; /* Used if the image is unavailable */
 }
 .timer{
-    position: absolute;
-    top: 35%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     z-index: 100;
+}
+.timer-container{
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 .complexity{
     margin-right: 0px;

@@ -26,8 +26,9 @@
                 <h5 class="card-title">Главный приз</h5>
                 <h6 class="card-subtitle text-warning" style="filter: blur(4px);">??? ???????? ?????? ???????</h6>
               </div>
-              <h1 id="timer" class="timer">00:00:00:00</h1>
-              <img src="{% static 'Home/img/locked.png' %}" style="filter: blur(5px);" width="100%" height="200px" alt="Приз">
+              <div class="container-fluid timer-container" style="height: 150px; width: 300px;">
+                <h1 id="timer"  class="timer">00:00:00:00</h1>
+              </div>
             {% endif %}
           {% else %}
             <div class="card-body">
