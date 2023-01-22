@@ -101,6 +101,9 @@ class UserProfileManager(models.Manager):
         user_profile.save()
 
     def remove_points(self, user, points):
+        if '-' in points:
+            points = points.replace('-', '')
+            return self.add_points(user, points)
         user_profile = self.get(user=user)
         user_profile.points -= int(points)
         user_profile.save()

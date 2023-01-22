@@ -48,3 +48,15 @@ def sign_up(request):
         UserProfile(user=user).save()
         return redirect(reverse('home:home'))
     return render(request, 'Login/sign-up/index.html')
+
+
+def sign_up_qr_code(request, first_name, last_name, username, password):
+    if request.user.is_authenticated:
+        return redirect(reverse('home:home'))
+    try:
+        user = User.objects.create_user(username, password=password, first_name=first_name, last_name=last_name)
+    except IntegrityError:
+        return render(request, 'Login/sign-up/index.html')
+    login(request, user)
+    UserProfile(user=user).save()
+    return redirect(reverse('home:home'))

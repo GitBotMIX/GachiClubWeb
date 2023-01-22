@@ -30,21 +30,34 @@ def get_home_page(request):
         return redirect(reverse('login:sign-up'))
 
 
-def perform_task(request):
-    if request.method == 'POST':
-        data = parse_qs(str(request.body.decode('utf-8')))
-        user = User.objects.get(pk=data['user_id'][0])
-        quest = Quests.objects.get(pk=data['quest_id'][0])
-        points = data['points'][0]
+def task_manipulator(request, delete_task=False):
 
-        user_quests = UserQuests.objects.filter(user=user, quest_completed=quest)
-        try:
-            if len(user_quests) >= user_quests[0].quest_completed.amount_available_user:
-                return JsonResponse({'error': 'Invalid request method'})
-        except IndexError:
-            pass
+    data = parse_qs(str(request.body.decode('utf-8')))
+    user = User.objects.get(pk=data['user_id'][0])
+    quest = Quests.objects.get(pk=data['quest_id'][0])
+    points = data['points'][0]
+
+    if delete_task:
+        UserQuests.objects.filter(user=user, quest_completed=quest)[0].delete()
+        UserProfile.objects.remove_points(user, points)
+    else:
         UserQuests(user=user, quest_completed=quest).save()
         UserProfile.objects.add_points(user, points)
+    return JsonResponse({'error': 'Invalid request method'})
+
+
+def perform_task(request):
+    if request.method == 'POST':
+        task_manipulator(request)
+        return JsonResponse({'status': 'success'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
+
+
+def delete_task(request):
+    if request.method == 'POST':
+
+        task_manipulator(request, delete_task=True)
         return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'error': 'Invalid request method'})

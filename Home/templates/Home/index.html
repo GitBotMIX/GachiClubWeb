@@ -7,6 +7,7 @@
 
 
 {% block content %}
+
 <div class="container">
   <div class="container row d-flex justify-content-center" style="margin: 0px; padding: 0px; width: 100%;">
     <div class="content col-12 col-sm-12 col-md-12 col-lg-6" style="padding: 0px">
@@ -76,8 +77,8 @@
           </div>
 
 
-        <div id="container-challenges" class="container challenges">
-          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2">
+        <div class="container challenges">
+          <div id="container-challenges" class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2">
                 {% if quests %}
                   {% for quest in quests %}
                     {% if gift %}
@@ -162,6 +163,51 @@
   <script>
     var current_sellect_category = document.getElementById('category-button-all');
 
+    function check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length) {
+      if (all_completed_challenges_length + all_full_completed_challenges_length == 0){
+        element_not_exist = document.getElementById('elements-not-exist')
+        if (element_not_exist){element_not_exist.remove()}
+        container_challenges = document.getElementById('container-challenges')
+        var elements_not_exist = document.createElement("div");
+        elements_not_exist.id = 'elements-not-exist';
+        elements_not_exist.innerHTML = `
+        Ты пока не выполнил ни одного задания
+          <img src="{% static 'Home/img/challenge_not_exist.jpg' %}" alt="">
+        `;
+        elements_not_exist.style.zIndex = 100;
+        elements_not_exist.style.color = 'red';
+        elements_not_exist.style.textAlign = 'center';
+
+        container_challenges.prepend(elements_not_exist)
+      }
+    }
+
+    function delete_previously_completed_quest(user_id, quest_id, el, reward) {
+      $.ajax({
+          type: "POST",
+          url: 'delete_task/',
+          data: {'user_id': user_id, 'quest_id': quest_id, 'points': reward},
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          dataType: 'json',
+          success: function(response) {
+              console.log(response.status);
+              //update_amount_completed_quest(quest_count_el);
+              update_amount_completed_quest(el, delete_quest=true);
+              update_rating();
+              all_completed_challenges_length = all_completed_challenge(hide=false, delete_button=true);
+              all_full_completed_challenges_length = all_full_completed_challenge(hide=false);
+              check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length);
+
+              
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      });
+    }
+
     function el_add_remove_button(container_button_el, button_el, button_classList, button_data, card_number) {
       user_id = button_data.slice(0)[0];
       quest_id = button_data.slice(1)[0];
@@ -171,10 +217,8 @@
       button.setAttribute("id", "button-card-" + card_number);
       button.setAttribute("type", "button");
       button.setAttribute("class", button_classList);
+      button.setAttribute("onclick", 'delete_previously_completed_quest("' + user_id + '",' + '"' + quest_id + '",' + 'this' + ',' + '"' + reward + '")');
       button.innerHTML = "Удалить";
-      button.onclick = function() {
-        delete_previously_completed_quest(user_id, quest_id, this, reward);
-      }
 
       container_button_el.replaceChildren();
       container_button_el.appendChild(button);
@@ -212,6 +256,11 @@
     function all_full_completed_challenge(hide=true) {
       all_full_completed_challenges = document.querySelectorAll('.completed-full');
       if (hide) {
+        element_not_exist = document.getElementById('elements-not-exist')
+        if (element_not_exist) {
+          element_not_exist.remove();
+        }
+        
         all_full_completed_challenges.forEach(element => {
           element.classList.add('hide');
           
@@ -225,6 +274,7 @@
           });
 
       }
+      return all_full_completed_challenges.length
     }
 
     function all_completed_challenge(hide=true, delete_button=true) {
@@ -252,7 +302,7 @@
         
         });
       }
-
+      return all_completed_challenges.length
     }
 
     function all_challenges(hide=true) {
@@ -272,13 +322,20 @@
       all_challenges(hide=false);
       all_completed_challenge(hide=false, delete_button=false);
       all_full_completed_challenge(hide=true);
+      element_not_exist = document.getElementById('elements-not-exist')
+      if (element_not_exist) {
+        element_not_exist.remove();
+      }
     }
 
 
     function filter_completed_challenges() {
       all_challenges(hide=true);
-      all_completed_challenge(hide=false, delete_button=true);
-      all_full_completed_challenge(hide=false);
+      all_completed_challenges_length = all_completed_challenge(hide=false, delete_button=true);
+      all_full_completed_challenges_length = all_full_completed_challenge(hide=false);
+      check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length);
+
+
     };
 
     function on_success_execute_quest() {
@@ -360,9 +417,8 @@
       container_challenges_el.prepend(inscription_successful_completion_all_tasks);
     };
 
-    function update_amount_completed_quest (quest_count_el){
-      
-      console.log(quest_count_el);
+    function update_amount_completed_quest (quest_count_el, delete_quest=false){
+      console.log(quest_count_el)
       var card_number = quest_count_el.id.split('-').slice(-1)[0];
       var card_el = document.getElementById('card-' + String(card_number));
       
@@ -373,22 +429,44 @@
       amount_completed = amount_completed_el.textContent.split('/');
       total_completed = Number(amount_completed.slice(0)[0]);
       max_completed = Number(amount_completed.slice(1)[0]);
-      
-      if (total_completed < max_completed - 1){
-        amount_completed_el.textContent = String(total_completed+1)+'/'+String(max_completed);
-      }
-      else {
-        card_el.remove();
+      if (delete_quest) {
+        console.log(total_completed)
         
-        existence_check_cards_from_category(card_category_identifier)
-      };
+        if (total_completed - 1 == 0) { 
+          button_challenge = get_button_challenge(card_el);
+          el_add_execute_button(button_challenge[0], button_challenge[1], button_challenge[2], button_challenge[3], button_challenge[4]);
+          card_el.classList.remove('completed');
+          try {
+            card_el.classList.remove('completed-full');
+          } catch {}
+          card_el.classList.add('hide');
+          amount_completed_el.textContent = String(total_completed-1)+'/'+String(max_completed);
+          
+          card_el.classList.remove('completed-full')
+        } else if (total_completed == max_completed) {
+          card_el.classList.remove('completed-full')
+          amount_completed_el.textContent = String(total_completed-1)+'/'+String(max_completed);
+        } else {
+          amount_completed_el.textContent = String(total_completed-1)+'/'+String(max_completed);
+        }
+
+      } else {
+        if (total_completed < max_completed - 1){
+          amount_completed_el.textContent = String(total_completed+1)+'/'+String(max_completed);
+          card_el.classList.add('completed');
+        }
+        else {
+          amount_completed_el.textContent = String(total_completed+1)+'/'+String(max_completed);
+          card_el.classList.remove('completed')
+          card_el.classList.add('completed-full');
+          card_el.classList.add('hide');
+          
+          existence_check_cards_from_category(card_category_identifier);
+        };
+      }
     };
 
     function perform_task(user_id, quest_id, quest_count_el, quest_reward){
-        // var url = 'perform_task/';
-        // var method = 'POST';
-        // var data = JSON.stringify({'data': 'example_data'});
-        // makeAjaxRequest(url, method, data);
       $.ajax({
           type: "POST",
           url: 'perform_task/',
@@ -456,6 +534,7 @@
 
 
     function category_visibility(identifier, category_button) {
+      
       old_inscription_successful_completion_all_tasks_el = document.getElementById('inscription-successful-completion-all-tasks');
       if (category_button) {
         current_sellect_category = document.getElementById(identifier.replace('identifier-', 'category-button-'));
@@ -489,7 +568,8 @@
       elementWithCategory.forEach(element => {
         element.classList.remove('hide');
       });
-      old_category_button = category_button;  
+      old_category_button = category_button;
+      all_full_completed_challenge();
     }
 
     var old_category_button = document.getElementById('show-all-challenge');
