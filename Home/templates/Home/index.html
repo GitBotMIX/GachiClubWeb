@@ -55,12 +55,12 @@
 
               <div class="btn-group super-category" role="group" aria-label="Button group with nested dropdown">
                 <div class="btn-group" role="group">
-                  <button id="btnGroupDrop3" type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Сложность</button>
+                  <button id="btnGroupDrop3" type="button" class="btn btn-outline-dark dropdown-toggle difficulty-buttons" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Сложность</button>
                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop3">
-                    <a class="dropdown-item" href="#">Сбросить</a>
-                    <a class="dropdown-item bg-success rounded-pill text-white" href="#">Легко</a>
-                    <a class="dropdown-item bg-warning rounded-pill text-white" href="#">Средне</a>
-                    <a class="dropdown-item bg-danger rounded-pill text-white" href="#">Сложно</a>
+                    <div class="dropdown-item" onclick="filter_all_challenge_visible()">Сбросить</div>
+                    <div class="dropdown-item bg-success rounded-pill text-white" onclick="filter_difficulty_challenge_visible(0)">Легко</div>
+                    <div class="dropdown-item bg-warning rounded-pill text-white" onclick="filter_difficulty_challenge_visible(1)">Средне</div>
+                    <div class="dropdown-item bg-danger rounded-pill text-white" onclick="filter_difficulty_challenge_visible(2)">Сложно</div>
                   </div>
                 </div>
               </div>
@@ -163,6 +163,7 @@
 {% block js %}
   <script>
     var current_sellect_category = document.getElementById('category-button-all');
+    var current_difficulty_filter = null;
 
     function check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length) {
       if (all_completed_challenges_length + all_full_completed_challenges_length == 0){
@@ -281,7 +282,6 @@
     function all_completed_challenge(hide=true, delete_button=true) {
       all_completed_challenges = document.querySelectorAll('.completed');
       if (hide) {
-        console.log('suc')
         all_completed_challenges.forEach(element => {
           element.classList.add('hide');
           button_challenge = get_button_challenge(element);
@@ -316,13 +316,77 @@
         all_challenge.forEach(element => {
         element.classList.remove('hide');
         });
+      };
+    }
+
+    function all_challenges_difficulty(difficulty_card_el, hide=true){
+      if (hide) {
+      difficulty_card_el.forEach(element => {
+        element.classList.add('hide');
+      });
+      } else {
+      difficulty_card_el.forEach(element => {
+        element.classList.remove('hide');
+      });
+      }
+    }
+
+    function hide_all_challenges_difficulty_except(except_difficulty) {
+      if (except_difficulty == 0) {
+        document.querySelectorAll('.medium').forEach(element => {
+          element.classList.add('hide');
+        });
+        document.querySelectorAll('.hard').forEach(element => {
+          element.classList.add('hide');
+        });
+      }
+      if (except_difficulty == 1) {
+        document.querySelectorAll('.easy').forEach(element => {
+          element.classList.add('hide');
+        });
+        document.querySelectorAll('.hard').forEach(element => {
+          element.classList.add('hide');
+        });
+      }
+      if (except_difficulty == 2) {
+        document.querySelectorAll('.easy').forEach(element => {
+          element.classList.add('hide');
+        });
+        document.querySelectorAll('.medium').forEach(element => {
+          element.classList.add('hide');
+        });
       }
 
     }
+
+    
+    function filter_difficulty_challenge_visible(difficulty, hide=false) {
+      if (difficulty == 0) {
+        card_el = document.querySelectorAll('.easy')
+        current_difficulty_filter = 0;
+      }
+      if (difficulty == 1) {
+        card_el = document.querySelectorAll('.medium')
+        current_difficulty_filter = 1;
+      }
+      if (difficulty == 2) {
+        card_el = document.querySelectorAll('.hard')
+        current_difficulty_filter = 2;
+      }
+      all_challenges(hide=true);
+      all_challenges_difficulty(card_el, hide=false);
+      element_not_exist = document.getElementById('elements-not-exist')
+      if (element_not_exist) {
+        element_not_exist.remove();
+      }
+    };
+
+
     function filter_all_challenge_visible() {
       all_challenges(hide=false);
       all_completed_challenge(hide=false, delete_button=false);
       all_full_completed_challenge(hide=true);
+      
       element_not_exist = document.getElementById('elements-not-exist')
       if (element_not_exist) {
         element_not_exist.remove();
@@ -335,11 +399,6 @@
       all_completed_challenges_length = all_completed_challenge(hide=false, delete_button=true);
       all_full_completed_challenges_length = all_full_completed_challenge(hide=false);
       check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length);
-
-
-    };
-
-    function on_success_execute_quest() {
 
     };
 
@@ -380,9 +439,6 @@
 
 
     function existence_check_cards_from_category(identifier) {
-      console.log(identifier);
-      console.log(current_sellect_category.id);
-      
       all_categoty_cards_len = document.querySelectorAll('.'+ identifier).length;
       if (all_categoty_cards_len == 0) {
         if (current_sellect_category.id == 'category-button-all'){
@@ -419,7 +475,6 @@
     };
 
     function update_amount_completed_quest (quest_count_el, delete_quest=false){
-      console.log(quest_count_el)
       var card_number = quest_count_el.id.split('-').slice(-1)[0];
       var card_el = document.getElementById('card-' + String(card_number));
       
@@ -431,7 +486,6 @@
       total_completed = Number(amount_completed.slice(0)[0]);
       max_completed = Number(amount_completed.slice(1)[0]);
       if (delete_quest) {
-        console.log(total_completed)
         
         if (total_completed - 1 == 0) { 
           button_challenge = get_button_challenge(card_el);
@@ -514,22 +568,27 @@
     };
     get_challenges_complexity();
     function get_challenges_complexity() {
-      elComplexity = document.querySelectorAll('.complexity');
+      cards_el = document.querySelectorAll('.challenge');
+      //elComplexity = document.querySelectorAll('.complexity');
       
-      elComplexity.forEach(element => {
-        if (element.textContent == '0'){
-          element.innerHTML = `Легко`;
-          element.classList.add('bg-success');
+      cards_el.forEach(element => {
+        elComplexity = element.querySelector('.complexity')
+        if (elComplexity.textContent == '0'){
+          elComplexity.innerHTML = `Легко`;
+          elComplexity.classList.add('bg-success');
+          element.className = "easy " + element.className;
         }
-        if (element.textContent == '1'){
-          element.innerHTML = `Средне`;
-          element.classList.add('bg-warning');
+        if (elComplexity.textContent == '1'){
+          elComplexity.innerHTML = `Средне`;
+          elComplexity.classList.add('bg-warning');
+          element.className = "medium " + element.className;
         }
-        if (element.textContent == '2'){
-          element.innerHTML = `Сложно`;
-          element.classList.add('bg-danger');
+        if (elComplexity.textContent == '2'){
+          elComplexity.innerHTML = `Сложно`;
+          elComplexity.classList.add('bg-danger');
+          element.className = "hard " + element.className;
         }
-        element.classList.remove('hide');
+        elComplexity.classList.remove('hide');
       });
     };
 
