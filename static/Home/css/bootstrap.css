@@ -107,12 +107,21 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
-h6, h5, h4, h3 {
+h6, h5, h4, h3, h1 {
   margin-top: 0;
   margin-bottom: 0.5rem;
   font-family: "Cabin Sketch", cursive;
   font-weight: 500;
   line-height: 1.2;
+}
+
+h1 {
+  font-size: calc(1.375rem + 1.5vw);
+}
+@media (min-width: 1200px) {
+  h1 {
+    font-size: 2.5rem;
+  }
 }
 
 h3 {
@@ -161,10 +170,6 @@ a {
 }
 a:hover {
   color: var(--bs-link-hover-color);
-}
-
-img {
-  vertical-align: middle;
 }
 
 button {
@@ -524,7 +529,7 @@ button:not(:disabled),
   outline: 0;
   box-shadow: var(--bs-btn-focus-box-shadow);
 }
-:not(.btn-check) + .btn:active, .btn:first-child:active {
+:not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
   color: var(--bs-btn-active-color);
   background-color: var(--bs-btn-active-bg);
   border-color: var(--bs-btn-active-border-color);
@@ -727,7 +732,8 @@ button:not(:disabled),
 }
 .btn-group > .btn:hover,
 .btn-group > .btn:focus,
-.btn-group > .btn:active {
+.btn-group > .btn:active,
+.btn-group > .btn.active {
   z-index: 1;
 }
 
@@ -982,9 +988,6 @@ button:not(:disabled),
   vertical-align: baseline;
   border-radius: var(--bs-badge-border-radius);
 }
-.badge:empty {
-  display: none;
-}
 
 .list-group {
   --bs-list-group-color: #212529;
@@ -1019,6 +1022,10 @@ button:not(:disabled),
   text-decoration: none;
   background-color: var(--bs-list-group-bg);
   border: var(--bs-list-group-border-width) solid var(--bs-list-group-border-color);
+}
+.list-group-item:first-child {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
 }
 .list-group-item:last-child {
   border-bottom-right-radius: inherit;
@@ -1218,6 +1225,9 @@ input,
   border-right: none;
   border-left: none;
   border-radius: 255px 5px 225px 5px/25px 225px 25px 255px;
+}
+.list-group-item:first-child {
+  border-top: none;
 }
 .list-group-item:last-child {
   border-bottom: none;
