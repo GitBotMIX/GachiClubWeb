@@ -12,17 +12,7 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-@font-face {
-    font-family: 'Neucha';
-    src: url('../fonts/Neucha.eot');
-    src: url('../fonts/Neucha.eot?#iefix') format('embedded-opentype'),
-        url('../fonts/Neucha.woff2') format('woff2'),
-        url('../fonts/Neucha.woff') format('woff'),
-        url('../fonts/Neucha.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
+@import url("https://fonts.googleapis.com/css?family=Neucha|Cabin+Sketch&display=swap");
 
 
 :root {
