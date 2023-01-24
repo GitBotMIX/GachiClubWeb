@@ -19,6 +19,9 @@
         url('../fonts/Neucha.woff2') format('woff2'),
         url('../fonts/Neucha.woff') format('woff'),
         url('../fonts/Neucha.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 
