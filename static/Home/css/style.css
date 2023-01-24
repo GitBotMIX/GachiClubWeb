@@ -1,8 +1,26 @@
+
+
+@font-face {
+    font-family: Sketch;
+    src: url('../fonts/TkachenkoSketch4F-Bold.eot');
+    src: url('../fonts/TkachenkoSketch4F-Bold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/TkachenkoSketch4F-Bold.woff2') format('woff2'),
+        url('../fonts/TkachenkoSketch4F-Bold.woff') format('woff'),
+        url('../fonts/TkachenkoSketch4F-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+.challenge-title {
+    font-family: Sketch;
+    font-size: 1.8em;
+}
  body{
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    font-family: Sketch;
 
     background-color: #cccccc; /* Used if the image is unavailable */
     overflow-x: hidden;

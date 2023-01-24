@@ -1,0 +1,12 @@
+@font-face {
+    font-family: 'Tkachenko Sketch 4F';
+    src: url('TkachenkoSketch4F-Bold.eot');
+    src: url('TkachenkoSketch4F-Bold.eot?#iefix') format('embedded-opentype'),
+        url('TkachenkoSketch4F-Bold.woff2') format('woff2'),
+        url('TkachenkoSketch4F-Bold.woff') format('woff'),
+        url('TkachenkoSketch4F-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
