@@ -95,13 +95,13 @@
                           <div class="card text-white mb-3" style="width: 20rem; background-color: {{ quest.category.color }};">
                             <div class="card-header d-flex">
                               <div class="reward">{{ quest.reward }} BUCKS</div>
-                              <div class="container-fluid d-flex justify-content-end container-complexity">
+                              <div class="container-fluid d-flex justify-content-end container-complexity" style="padding: 0px;">
                                 <div class="container-fluid d-flex justify-content-end container-complexity">
                                   <span class="badge rounded-pill complexity hide">{{ quest.complexity }}</span>
                                 </div>
-                                <span id="card-count-{{ forloop.counter }}" class="badge bg-light mr-5">
-                                  {{ quest.user_completion }}/{{ quest.amount_available_user }}
-                                </span>
+                                  <span id="card-count-{{ forloop.counter }}" class="badge bg-light mr-5">
+                                    {{ quest.user_completion }}/{{ quest.amount_available_user }}
+                                  </span>
                               </div>
                             </div>
                         {% if gift.unblocked %}
@@ -132,6 +132,14 @@
                   <h1>Пока заданий нету</h1>
                 {% endif %}
               
+            <article class="challenge-hide col d-flex justify-content-center">
+              <div class="card border-light mb-3" style="width: 20rem;">
+                <div class="card-body">
+                  <h4 class="card-title"></h4>
+                  <p class="card-text"></p>
+                </div>
+              </div>
+            </article>
             <article class="challenge-hide col d-flex justify-content-center">
               <div class="card border-light mb-3" style="width: 20rem;">
                 <div class="card-body">
