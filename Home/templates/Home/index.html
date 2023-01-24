@@ -27,7 +27,7 @@
                 <h6 class="card-subtitle text-warning" style="filter: blur(4px);">??? ???????? ?????? ???????</h6>
               </div>
               <div class="container-fluid timer-container" style="height: 150px; width: 300px;">
-                <h1 id="timer"  class="timer">00:00:00:00</h1>
+                <h1 id="timer"  class="timer"></h1>
               </div>
             {% endif %}
           {% else %}
@@ -48,7 +48,18 @@
       </div>
 
       <div class="container content card text-white bg-white border-primary mb-3" style="padding: 5px;">
-          <div class="card border-primary mb-3 d-flex" style="width: 100%; flex-direction: row; border: 0px; border-bottom: 2px solid black;">
+        <div class="container" style="z-index: 1000;">
+
+        </div>
+          <div id="challenge-load" class="container challenge-load">
+            <div class="container challenge-load-text">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+              </div>
+            </div>
+            
+          </div>
+          <div id="filter_container" class="card border-primary mb-3 d-flex hide" style="width: 100%; flex-direction: row; border: 0px; border-bottom: 2px solid black;">
             <div class="card-header card-header-category border-right" style="border-bottom: 0px; padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x); max-width: 150px; border-radius: 3px 3px 0 0/100px 165px 0 0;">
               <button style="" id="category-button-all" onclick="filter_all_challenge_visible()" type="button" class="btn btn-outline-secondary super-category">Все</button>
               <button type="button" class="btn btn-outline-dark super-category" onclick="filter_completed_challenges()">Выполненные</button>
@@ -77,8 +88,8 @@
             </div>
           </div>
 
-
-        <div class="container challenges">
+        
+        <div id="challenges_container" class="container challenges hide">
           <div id="container-challenges" class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2">
                 {% if quests %}
                   {% for quest in quests %}
@@ -645,7 +656,25 @@
     let timerShow = document.getElementById("timer");
     
     
-    timer = setInterval(function () {
+
+    window.addEventListener('load', function() {
+        update_rating();
+        console.log('Font has loaded');
+        
+        filter_container = document.getElementById('filter_container').classList.remove('hide')
+        challenges_container = document.getElementById('challenges_container').classList.remove('hide')
+        document.getElementById('challenge-load').classList.add('hide');
+        update_timer();
+        setInterval(function() {
+            update_timer();
+        }, 1000);
+        
+        setInterval(function() {
+            update_rating();
+        }, 5000);
+    });
+
+    function update_timer() {
         let seconds = secondsToUnlockGift; 
         
         //days 
@@ -674,13 +703,6 @@
             timerShow.innerHTML = strTimer;
         };
         --secondsToUnlockGift; // Уменьшаем таймер
-    }, 1000);
-    window.addEventListener('load', function() {
-        update_rating();
-        console.log('Font has loaded');
-        setInterval(function() {
-            update_rating();
-        }, 5000);
-    });
+    };
   </script>
 {% endblock %}
