@@ -616,6 +616,10 @@ button:not(:disabled),
   color: var(--bs-btn-color);
 }
 
+.collapse:not(.show) {
+  display: none;
+}
+
 .dropdown {
   position: relative;
 }
@@ -1031,9 +1035,6 @@ button:not(:disabled),
   color: var(--bs-list-group-disabled-color);
   pointer-events: none;
   background-color: var(--bs-list-group-disabled-bg);
-}
-.list-group-item + .list-group-item {
-  border-top-width: 0;
 }
 
 /* rtl:begin:ignore */

@@ -40,7 +40,7 @@
 
 
           <ul id="users_rating" class="list-group">
-
+            <ul id="users_rating" class="list-group"><li class="list-group-item d-flex justify-content-between align-items-center">Загрузка...<span class="badge bg-primary rounded-pill">0</span></li></ul>
           </ul>
 
 
@@ -172,7 +172,6 @@
   <script>
     var current_sellect_category = document.getElementById('category-button-all');
     var current_difficulty_filter = null;
-
     function check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length) {
       if (all_completed_challenges_length + all_full_completed_challenges_length == 0){
         element_not_exist = document.getElementById('elements-not-exist')
@@ -678,6 +677,7 @@
     }, 1000);
     window.addEventListener('load', function() {
         update_rating();
+        console.log('Font has loaded');
         setInterval(function() {
             update_rating();
         }, 5000);
