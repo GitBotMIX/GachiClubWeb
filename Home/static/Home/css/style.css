@@ -124,7 +124,7 @@
 }
 .rating-crown{
     position: absolute;
-    margin-top: 246px;
+    margin-top: 245px;
     top: 0px;
     left: -13px;
     width: 47px;
@@ -137,16 +137,16 @@
 }
 @media (min-width: 600px) {
   .rating-crown{
-    margin-top: 248px;
+    margin-top: 247px;
   }
 }
 @media (min-width: 900px) {
   .rating-crown{
-    margin-top: 250px;
+    margin-top: 249px;
   }
 }
 @media (min-width: 1100px) {
   .rating-crown{
-    margin-top: 252px;
+    margin-top: 251px;
   }
 }
