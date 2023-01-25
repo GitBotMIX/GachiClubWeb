@@ -38,7 +38,7 @@
             <img src="{% static 'Home/img/locked.png' %}" style="filter: blur(5px);" width="100%" height="200px" alt="Приз">
           {% endif %}
 
-
+          <img id="rating_crown" class="rating-crown hide" src="{% static 'Home/img/crown.png' %}" alt="">
           <ul id="users_rating" class="list-group">
             <ul id="users_rating" class="list-group"><li class="list-group-item d-flex justify-content-between align-items-center">Загрузка...<span class="badge bg-primary rounded-pill">0</span></li></ul>
           </ul>
@@ -438,13 +438,7 @@
                 const listItem = document.createElement("li");
                 listItem.className = "list-group-item d-flex justify-content-between align-items-center";
                 if (i == 0) {
-                  console.log(rating_arr['user__first_name'] + ' ' + rating_arr['user__last_name'])
-                  const rating_crown_img = document.createElement('img');
-                  rating_crown_img.classList.add('rating-crown');
-                  rating_crown_img.src = '{% static "Home/img/crown.png" %}';
-                  rating_crown_img.alt = 'crown';
                   listItem.style.backgroundColor = '#fff2c0';
-                  users_rating.appendChild(rating_crown_img)
                   
                 }
 
@@ -668,9 +662,9 @@
     
     window.addEventListener('load', function() {
         update_rating();
-        console.log('Font has loaded');
-        filter_container = document.getElementById('filter_container').classList.remove('hide')
-        challenges_container = document.getElementById('challenges_container').classList.remove('hide')
+        filter_container = document.getElementById('filter_container').classList.remove('hide');
+        challenges_container = document.getElementById('challenges_container').classList.remove('hide');
+        document.getElementById('rating_crown').classList.remove('hide');
         document.getElementById('challenge-load').classList.add('hide');
         update_timer();
         setInterval(function() {
