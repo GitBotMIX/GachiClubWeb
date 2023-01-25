@@ -20,13 +20,13 @@
                 <h5 class="card-title">Главный приз</h5>
                 <h6 class="card-subtitle text-warning">{{ gift.name }}</h6>
               </div>
-              <img src="{{ gift.image.url }}" width="100%" height="200px" alt="Приз">
+              <img src="{{ gift.image.url }}" alt="Приз" style="height: 150px;">
             {% else %}
               <div class="card-body">
                 <h5 class="card-title">Главный приз</h5>
                 <h6 class="card-subtitle text-warning" style="filter: blur(4px);">??? ???????? ?????? ???????</h6>
               </div>
-              <div class="container-fluid timer-container" style="height: 150px; width: 300px;">
+              <div class="container-fluid timer-container" style="height: 150px;">
                 <h1 id="timer"  class="timer"></h1>
               </div>
             {% endif %}
@@ -61,7 +61,7 @@
           </div>
           <div id="filter_container" class="card border-primary mb-3 d-flex hide" style="width: 100%; flex-direction: row; border: 0px; border-bottom: 2px solid black;">
             <div class="card-header card-header-category border-right" style="border-bottom: 0px; padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x); max-width: 150px; border-radius: 3px 3px 0 0/100px 165px 0 0;">
-              <button style="" id="category-button-all" onclick="filter_all_challenge_visible()" type="button" class="btn btn-outline-secondary super-category">Все</button>
+              <button id="category-button-all" onclick="filter_all_challenge_visible()" type="button" class="btn btn-outline-secondary super-category">Все</button>
               <button type="button" class="btn btn-outline-dark super-category" onclick="filter_completed_challenges()">Выполненные</button>
 
               <div class="btn-group super-category" role="group" aria-label="Button group with nested dropdown">
@@ -433,9 +433,20 @@
               users_rating = document.getElementById('users_rating');
               users_rating.replaceChildren();
               for (let i = 0; i <= rating_arr_all.length - 1; i++) {
+                console.log(i)
                 rating_arr = rating_arr_all[i];
                 const listItem = document.createElement("li");
                 listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                if (i == 0) {
+                  console.log(rating_arr['user__first_name'] + ' ' + rating_arr['user__last_name'])
+                  const rating_crown_img = document.createElement('img');
+                  rating_crown_img.classList.add('rating-crown');
+                  rating_crown_img.src = '{% static "Home/img/crown.png" %}';
+                  rating_crown_img.alt = 'crown';
+                  listItem.style.backgroundColor = '#fff2c0';
+                  users_rating.appendChild(rating_crown_img)
+                  
+                }
 
                 const name = document.createTextNode(rating_arr['user__first_name'] + ' ' + rating_arr['user__last_name']);
                 listItem.appendChild(name);
@@ -655,12 +666,9 @@
     let secondsToUnlockGift = Number({{ gift.unblocked_via }});
     let timerShow = document.getElementById("timer");
     
-    
-
     window.addEventListener('load', function() {
         update_rating();
         console.log('Font has loaded');
-        
         filter_container = document.getElementById('filter_container').classList.remove('hide')
         challenges_container = document.getElementById('challenges_container').classList.remove('hide')
         document.getElementById('challenge-load').classList.add('hide');
