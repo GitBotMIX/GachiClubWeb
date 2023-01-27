@@ -19,12 +19,14 @@
   <link rel="stylesheet" href="{% static 'Login/css/style.css' %}">
 </head>
 
-<body class="img js-fullheight" style="background-image: url({% static 'Login/images/gachi_bg.jpg' %});">
+<body class="img js-fullheight" style="background-color: #cfc7c7;">
+  
   <header>
     {% block header %}
     {% endblock %}
   </header>
   <main>
+    <div id="background_image" class="container-fluid" style="z-index: -100; opacity: 40%; ;width: 100%; height: 100%; position: fixed; left: -4px; top: 0px; background-image: url({% static 'Home/img/gachi_simbol.png' %}); background-size: 60px;"></div>
     {% block content %}
     {% endblock %}
   </main>
