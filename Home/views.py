@@ -5,7 +5,7 @@ from .models import Gifts, Quests, Category, UserQuests, UserProfile
 from django.utils import timezone
 from urllib.parse import parse_qs
 from django.contrib.auth.models import User
-from django.db.models import Max, Count
+from django.db.models import Max, Count, OuterRef, Case, When, IntegerField
 from django.db.models import Q
 import json
 
@@ -19,7 +19,7 @@ def get_home_page(request):
         gift = None
         user_quests = UserQuests.objects.filter(user=request.user)
         for quest in quests:
-            quest.user_completion = UserQuests.objects.filter(quest_completed=quest, user=request.user).count()
+            quest.user_completion = user_quests.filter(quest_completed=quest, user=request.user).count()
 
         if gifts:
             gift = gifts[0]
@@ -38,18 +38,29 @@ def task_manipulator(request, delete_task=False):
     points = data['points'][0]
 
     if delete_task:
-        UserQuests.objects.filter(user=user, quest_completed=quest)[0].delete()
-        UserProfile.objects.remove_points(user, points)
+        try:
+            UserQuests.objects.filter(user=user, quest_completed=quest)[0].delete()
+            UserProfile.objects.remove_points(user, points)
+            return JsonResponse({'status': 'success'})
+        except IndexError:
+            return JsonResponse({'error': 'Data invalid'})
+
     else:
-        UserQuests(user=user, quest_completed=quest).save()
-        UserProfile.objects.add_points(user, points)
-    return JsonResponse({'error': 'Invalid request method'})
+        count_available_from_user = quest.amount_available_user
+        completed_user_count = UserQuests.objects.filter(quest_completed=quest, user=user).count()
+
+        if count_available_from_user > completed_user_count:
+            UserQuests(user=user, quest_completed=quest).save()
+            UserProfile.objects.add_points(user, points)
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'error': 'Invalid request method'})
 
 
 def perform_task(request):
     if request.method == 'POST':
-        task_manipulator(request)
-        return JsonResponse({'status': 'success'})
+        response = task_manipulator(request)
+        return response
     else:
         return JsonResponse({'error': 'Invalid request method'})
 
@@ -66,7 +77,7 @@ def delete_task(request):
 def get_rating(request):
     if request.method == 'POST':
         users_rating = UserProfile.objects.get_ranking()
-        return JsonResponse({'response': list(users_rating.values('user__first_name', 'user__last_name', 'points'))})
+        return JsonResponse({'response': list(users_rating.values('user__id', 'user__first_name', 'user__last_name', 'points'))})
 
 
 def completed_tasks(request):
@@ -90,3 +101,24 @@ def completed_tasks(request):
                     added_quests.append(user_quest.quest_completed.id)
             return render(request, 'Home/completed_tasks.html', {'user_quests': user_quests})
 
+
+def get_user_punishment(request):
+    if request.method == 'POST':
+        data = parse_qs(str(request.body.decode('utf-8')))
+        user_id = data['user_id'][0]
+        user_quests = UserQuests.objects.filter(user__id=user_id)
+        punishment_quests = Quests.objects.filter(available=True, category__name='Наказания').annotate(
+            user_completion_count=Count(
+                Case(
+                    When(userquests__user__id=user_id, then=1),
+                    output_field=IntegerField()
+                )
+            )
+        )
+
+        response_data = list(punishment_quests.values('id', 'category', 'category__color', 'complexity', 'title',
+                                                      'description', 'reward', 'amount_available_user',
+                                                      'user_completion_count'))
+        return JsonResponse({'response': response_data})
+        #return JsonResponse({'response': response_data})
+        #return JsonResponse({'response': 'test'})

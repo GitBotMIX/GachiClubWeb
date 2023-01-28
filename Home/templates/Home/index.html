@@ -7,6 +7,7 @@
 
 
 {% block content %}
+<div id="offcanvas_backdrop" onclick="close_all_offcanvas()" class="offcanvas-backdrop fade show hide"></div>
 
 <div class="container">
   <div class="container row d-flex justify-content-center" style="margin: 0px; padding: 0px; width: 100%;">
@@ -20,7 +21,9 @@
                 <h5 class="card-title">Главный приз</h5>
                 <h6 class="card-subtitle text-warning">{{ gift.name }}</h6>
               </div>
-              <img src="{{ gift.image.url }}" alt="Приз" style="height: 150px;">
+              <div class="container d-flex justify-content-center">
+                <img src="{{ gift.image.url }}" alt="Приз" style="height: 150px; width: 300px;">
+              </div>
             {% else %}
               <div class="card-body">
                 <h5 class="card-title">Главный приз</h5>
@@ -40,7 +43,7 @@
 
           <img id="rating_crown" class="rating-crown hide" src="{% static 'Home/img/crown.png' %}" alt="">
           <ul id="users_rating" class="list-group">
-            <ul id="users_rating" class="list-group"><li class="list-group-item d-flex justify-content-between align-items-center">Загрузка...<span class="badge bg-primary rounded-pill">0</span></li></ul>
+            <button class="list-group-item d-flex justify-content-between align-items-center btn btn-danger"  type="button">Загрузка...<span class="badge bg-primary rounded-pill">0</span></button>
           </ul>
 
 
@@ -57,8 +60,8 @@
                 <span class="visually-hidden">Загрузка...</span>
               </div>
             </div>
-            
           </div>
+
           <div id="filter_container" class="card border-primary mb-3 d-flex hide" style="width: 100%; flex-direction: row; border: 0px; border-bottom: 2px solid black;">
             <div class="card-header card-header-category border-right" style="border-bottom: 0px; padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x); max-width: 150px; border-radius: 3px 3px 0 0/100px 165px 0 0;">
               <button id="category-button-all" onclick="filter_all_challenge_visible()" type="button" class="btn btn-outline-secondary super-category">Все</button>
@@ -142,7 +145,6 @@
                 {% else %}
                   <h1>Пока заданий нету</h1>
                 {% endif %}
-              
             <article class="challenge-hide col d-flex justify-content-center">
               <div class="card border-light mb-3" style="width: 20rem;">
                 <div class="card-body">
@@ -183,6 +185,8 @@
   <script>
     var current_sellect_category = document.getElementById('category-button-all');
     var current_difficulty_filter = null;
+    var user_id_global;
+    var offcanvas_is_open;
     function check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length) {
       if (all_completed_challenges_length + all_full_completed_challenges_length == 0){
         element_not_exist = document.getElementById('elements-not-exist')
@@ -421,7 +425,135 @@
 
     };
 
+    function offcanvas_show_cards(card_data, user_id, offcanvas_id) {
+      console.log(user_id);
+      offcanvas_body_el = document.getElementById('offcanvas_body_' + user_id);
+      offcanvas_body_el.replaceChildren();
+      for (let i = 0; i <= card_data.length - 1; i++) {
+        data_arr = card_data[i];
+
+        category = data_arr['category'];
+        complexity = data_arr['complexity'];
+        quest_id = data_arr['id'];
+        category_color = data_arr['category__color'];
+        title = data_arr['title'];
+        description = data_arr['description'];
+        reward = data_arr['reward'];
+        amount_available_user = data_arr['amount_available_user'];
+        user_completion_count = data_arr['user_completion_count'];
+
+        const card = document.createElement("div");
+
+        card.innerHTML =  `
+                        <article class="col d-flex justify-content-center">
+                          <div class="card text-white mb-3" style="width: 20rem; background-color: ` + category_color + `;">
+                            <div class="card-header d-flex">
+                              <div class="reward">` + reward + ` BUCKS</div>
+                              <div class="container-fluid d-flex justify-content-end container-complexity" style="padding: 0px;">
+                                <div class="container-fluid d-flex justify-content-end container-complexity">
+                                  <span class="badge rounded-pill complexity hide">` + complexity + `</span>
+                                </div>
+                                  <span class="badge bg-light mr-5">
+                                    ` + user_completion_count + `/` + amount_available_user + `
+                                  </span>
+                              </div>
+                            </div>
+                            <div class="card-body ">
+                              <h4 class="card-title challenge-title">` + title + `</h4>
+                              {% if gift.unblocked %}
+                              <p class="card-text challenge-description">` + description + `</p>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                              
+                                <button type="button" onclick="perform_task('` + user_id + `', '` + quest_id + `', this, ` + reward + `, '` + offcanvas_id + `')" class="quest-button btn btn-light button_data=` + user_id_global + `', '` + quest_id + `', this, ` + reward + `">Наказать</button>
+                              {% else %}
+                              <p class="card-text challenge-description quest-blur text-blur">` + 'abobus nihuya sebe ti huesos' + `</p>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                                <button type="button" class="quest-button btn btn-light active">Наказать</button>
+                              {% endif %}
+                            </div>  
+                          </div>
+                        </article>`;
+        offcanvas_body_el.appendChild(card);
+      };
+    };
+
+    function get_user_punishment(user_id) {
+      return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'get_user_punishment/',
+          data: {'user_id': user_id},
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            //console.log(response.response)
+            
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+
+    function close_all_offcanvas() {
+      document.getElementById('offcanvas_backdrop').classList.add('hide');
+      document.body.classList.remove('modal-open');
+      offcanvas_els = document.querySelectorAll('.offcanvas');
+      offcanvas_els.forEach(element => {
+        element.classList.remove('show');
+      });
+
+      offcanvas_is_open = false;
+      console.log('aboba')
+      update_rating()
+      
+    };
+
+    function close_offcanvas(offcanvas_id) {
+      close_all_offcanvas();
+      
+      //offcanvas_el = document.getElementById(offcanvas_id);
+      //offcanvas_el.classList.remove('show');
+    };
+
+    function show_offcanvas(offcanvas_id, user_id) {
+      offcanvas_el = document.getElementById(offcanvas_id);
+      offcanvas_el.classList.add('show');
+      document.body.classList.add('modal-open');
+      document.getElementById('offcanvas_backdrop').classList.remove('hide');
+
+      offcanvas_is_open = true
+    };
+
+    let user_punishment_data;
+    function show_user_menu_from_rating(user_id, offcanvas_id) {
+      show_offcanvas(offcanvas_id, user_id);
+      get_user_punishment(user_id).then(function(data) {
+        user_punishment_data = data.response;
+        offcanvas_show_cards(user_punishment_data, user_id, offcanvas_id)
+        console.log(user_punishment_data);
+      }).catch(function(error) {
+        // код, который будет выполнен в случае ошибки
+        console.log('get_user_punishment: error')
+      });
+      
+      
+      //offcanvas_show_cards(user_punishment_data)
+
+
+    };
+
+
+
     function update_rating(){
+      if (offcanvas_is_open) {
+        return null
+      }
       $.ajax({
           type: "POST",
           url: 'get_rating/',
@@ -432,25 +564,52 @@
               rating_arr_all = response.response
               users_rating = document.getElementById('users_rating');
               users_rating.replaceChildren();
+              console.log(rating_arr_all)
               for (let i = 0; i <= rating_arr_all.length - 1; i++) {
-                console.log(i)
                 rating_arr = rating_arr_all[i];
+                const user_id = rating_arr['user__id']
+                offcanvas_id = 'user_punishment_' + rating_arr['user__first_name'] + '_' + rating_arr['user__last_name']
+                const user_first_and_last_name = rating_arr['user__first_name'] + ' ' + rating_arr['user__last_name']
+                const canvas_from_item = document.createElement('div');
                 const listItem = document.createElement("li");
-                listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+
+                listItem.innerHTML =  `` + user_first_and_last_name + `
+                <div class="">
+                  <span class="badge bg-primary rounded-pill">` + rating_arr['points'] + `</span>
+                  <button class='btn p-0' onclick="show_user_menu_from_rating('` + user_id + `', '` + offcanvas_id + `')">
+                    <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                  </button>
+                </div>
+                `;
+                listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+                //listItem.setAttribute("data-bs-toggle", "offcanvas");
+                //listItem.setAttribute("data-bs-target", "#" + offcanvas_id);
+                //listItem.setAttribute("aria-controls", "offcanvasExample");
+                //listItem.setAttribute("onclick", "show_user_menu_from_rating('" + user_id +"', '" + offcanvas_id +"')");
+
+                canvas_from_item.innerHTML = `
+                  <div class="offcanvas offcanvas-start text-primary" tabindex="-1" id="` + offcanvas_id + `" aria-labelledby="offcanvasExampleLabel">
+                    <div class="offcanvas-header">
+                      <h5 class="offcanvas-title" id="offcanvasExampleLabel">` + user_first_and_last_name + `</h5>
+                      <button type="button" onclick="close_offcanvas('` + offcanvas_id + `')" class="btn-close text-reset" aria-label="Close"></button>
+                    </div>
+                    <div id="offcanvas_body_` + user_id + `" class="offcanvas-body">
+                      <div id="challenge-load" class="container challenge-load">
+                        <div class="container challenge-load-text">
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>`;
                 if (i == 0) {
                   listItem.style.backgroundColor = '#fff2c0';
-                  
                 }
 
-                const name = document.createTextNode(rating_arr['user__first_name'] + ' ' + rating_arr['user__last_name']);
-                listItem.appendChild(name);
-
-                const badge = document.createElement("span");
-                badge.className = "badge bg-primary rounded-pill";
-                const badgeText = document.createTextNode(rating_arr['points']);
-                badge.appendChild(badgeText);
-                listItem.appendChild(badge);
+                users_rating.appendChild(canvas_from_item);
                 users_rating.appendChild(listItem);
+                
               }
 
               
@@ -545,7 +704,7 @@
       }
     };
 
-    function perform_task(user_id, quest_id, quest_count_el, quest_reward){
+    function perform_task(user_id, quest_id, quest_count_el, quest_reward, offcanvas_id=false){
       $.ajax({
           type: "POST",
           url: 'perform_task/',
@@ -556,8 +715,14 @@
           dataType: 'json',
           success: function(response) {
               console.log(response.status);
-              update_amount_completed_quest(quest_count_el);
-              update_rating();
+
+              if (offcanvas_id) {
+                close_all_offcanvas();
+              } else {
+                update_rating();
+                update_amount_completed_quest(quest_count_el);
+              }
+              
               
           },
           error: function(error) {
@@ -661,19 +826,24 @@
     let timerShow = document.getElementById("timer");
     
     window.addEventListener('load', function() {
-        update_rating();
-        filter_container = document.getElementById('filter_container').classList.remove('hide');
-        challenges_container = document.getElementById('challenges_container').classList.remove('hide');
-        document.getElementById('rating_crown').classList.remove('hide');
-        document.getElementById('challenge-load').classList.add('hide');
+      update_rating();
+      
+      filter_container = document.getElementById('filter_container').classList.remove('hide');
+      challenges_container = document.getElementById('challenges_container').classList.remove('hide');
+      document.getElementById('rating_crown').classList.remove('hide');
+      document.getElementById('challenge-load').classList.add('hide');
+      {% if gift.unblocked %}
+        setInterval(function() {
+          console.log('suc')
+          update_rating();
+        }, 10000);
+      {% else %}
         update_timer();
         setInterval(function() {
-            update_timer();
+          update_timer();
         }, 1000);
-        
-        setInterval(function() {
-            update_rating();
-        }, 5000);
+      {% endif %}
+  
     });
 
     function update_timer() {

@@ -25,6 +25,9 @@
     background-color: #cccccc; /* Used if the image is unavailable */
     overflow-x: hidden;
 }
+body.modal-open {
+    overflow: hidden;
+}
   header{
     width: 100%;
   }
@@ -135,6 +138,13 @@
 .rating-leader{
     background-color: #ffeb9b;
 }
+.rating-menu-icon{
+    width: 30px;
+    height: 20px;
+}
+.offcanvas-backdrop{
+    overflow: hidden;
+}
 @media (min-width: 600px) {
   .rating-crown{
     margin-top: 247px;
@@ -150,3 +160,4 @@
     margin-top: 251px;
   }
 }
+
