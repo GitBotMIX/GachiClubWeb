@@ -15,7 +15,6 @@ class RouletteItems(models.Model):
     custom_color = models.CharField(db_index=True, max_length=15, verbose_name='Кастомный цвет', null=True, blank=True)
 
     class Meta:
-        ordering = ('quest__reward',)
         verbose_name = 'Предметы рулетки'
         verbose_name_plural = 'Предметы рулетки'
 
