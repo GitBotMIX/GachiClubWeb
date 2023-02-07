@@ -48,7 +48,7 @@
                     <tr>
                         <div class="roulette-container">
                             <img onClick="startSpin();" class="center-img" src="{% static 'roulette/img/roulette_center.png' %}" alt="">
-                            <canvas id="canvas" width="367" height="444">
+                            <canvas id="canvas" width="367" height="444" data-responsiveMinWidth="180" data-responsiveScaleHeight="true" data-responsiveMargin="50">
                                 <p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
                             </canvas>
                             <img class="triangle-img" src="{% static 'roulette/img/triangle2.png' %}" alt="">
@@ -119,6 +119,18 @@
     var modal_description = document.getElementById('modal_description');
     var modal_reward = document.getElementById('modal_reward');
     var modal_buttons = document.getElementById('modal_buttons');
+
+    function canvas_quality_improvement() {
+        const ratio = window.devicePixelRatio;
+        const canvas = document.getElementById("canvas");
+
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+    //canvas_quality_improvement();
 
     function colorize_navbar_brand() {
         navbar_brand = document.getElementById('navbar_brand');
@@ -485,6 +497,7 @@
         'innerRadius'   : 30,  // Set inner radius to make wheel hollow.
         'textFontSize'  : 14,   // Set font size accordingly.
         'textFontFamily': 'Sketch',
+        'responsive'    : true,  // This wheel is responsive!
         'textMargin'    : 0,
         'lineWidth'     : 0,    // Take out default margin.
         'segments'      :       // Define segments including colour and text.
@@ -513,18 +526,6 @@
             {% endif %}
 
         ],
-        'pins' :    // Specify pin parameters.
-        {
-            {% if roulette_items %}
-                'number'   : {{ roulette_items_len }},
-            {% else %}
-                'number'   : 12,
-            {% endif %}
-            'outerRadius' : 0,
-            'margin'      : 0,
-            'fillStyle'   : '#000000',
-            'strokeStyle' : '#000000'
-        },
         'animation' :           // Define spin to stop animation.
         {
             'type'     : 'spinToStop',
@@ -538,6 +539,7 @@
 
 
     // Vars used by the code in this page to do power controls.
+    theWheel.scale(3,3);
     var theWheelOld = theWheel
     var wheelPower    = 0;
     var wheelSpinning = false;
@@ -549,6 +551,7 @@
     function spin_wheel() {
         if (wheelSpinning == false)
         {
+            
             theWheelOld.draw();
             play_spin_sound();
             theWheelOld.startAnimation();
