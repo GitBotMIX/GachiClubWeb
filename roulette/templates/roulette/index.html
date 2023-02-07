@@ -40,7 +40,7 @@
         <div class="roulette-background-image" style="background-image: url('{% static 'Home/img/Roulette_background2.png' %}');"></div>
         <h3 class="card-header">Gachi Roulette</h3>
         <div class="card-body">
-          <h5 class="card-title text-muted">Испытай удачу</h5>
+          <h5 class="card-title text-muted">Лохотрон</h5>
         </div>
         <div class="card-body" style="padding: 0px;">
 
@@ -495,8 +495,9 @@
            // Specify number of segments.
         'outerRadius'   : 181.5,  // Set radius to so wheel fits the background.
         'innerRadius'   : 30,  // Set inner radius to make wheel hollow.
-        'textFontSize'  : 14,   // Set font size accordingly.
-        'textFontFamily': 'Sketch',
+        'textFontSize'  : 15,   // Set font size accordingly.
+        'textFontFamily': 'Neucha',
+        'textFontWeight': '500',
         'responsive'    : true,  // This wheel is responsive!
         'textMargin'    : 0,
         'lineWidth'     : 0,    // Take out default margin.
@@ -506,11 +507,11 @@
                 {% for roulette_item in roulette_items %}
                     
                     {% if forloop.counter|divisibleby:2 %}
-                        {'fillStyle': 'rgb(171, 250, 184)', 'text': '{{ roulette_item.get_title }}', 
+                        {'fillStyle': 'rgb(171, 250, 184)', 'text': '{{ roulette_item.get_title }}', 'textFillStyle': 'black',
                         'reward': '{{ roulette_item.get_reward }}', 'item_id': '{{ roulette_item.id }}',
                         'description': '{{ roulette_item.get_description }}'},
                     {% else %}
-                        {'fillStyle': '#757575', 'text': '{{ roulette_item.get_title }}', 
+                        {'fillStyle': '#757575', 'text': '{{ roulette_item.get_title }}', 'textFillStyle': 'black',
                         'reward': '{{ roulette_item.get_reward }}', 'item_id': '{{ roulette_item.id }}',
                         'description': '{{ roulette_item.get_description }}'},
                     {% endif %}
@@ -539,7 +540,6 @@
 
 
     // Vars used by the code in this page to do power controls.
-    theWheel.scale(3,3);
     var theWheelOld = theWheel
     var wheelPower    = 0;
     var wheelSpinning = false;
@@ -551,7 +551,6 @@
     function spin_wheel() {
         if (wheelSpinning == false)
         {
-            
             theWheelOld.draw();
             play_spin_sound();
             theWheelOld.startAnimation();
@@ -599,6 +598,7 @@
                 //old_segments_fill.push(theWheel.segments[x].fillStyle)
                 theWheel.segments[x].fillStyle = old_segments_fill[x];
             }
+        console.log(theWheel.segments.slice(-1))
         theWheel.draw();                // Call draw to render changes to the wheel.
 
         wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
@@ -701,11 +701,11 @@
             if (is_first_rotate) {
                 for (let x = 1; x < theWheel.segments.length; x ++) {
                 old_segments_fill.push(theWheel.segments[x].fillStyle)
-                theWheel.segments[x].fillStyle = '#464646';
+                theWheel.segments[x].fillStyle = '#757575';
                 }
             } else {
                 for (let x = 1; x < theWheel.segments.length; x ++) {
-                    theWheel.segments[x].fillStyle = '#464646';
+                    theWheel.segments[x].fillStyle = '#757575';
                 }
             }
 

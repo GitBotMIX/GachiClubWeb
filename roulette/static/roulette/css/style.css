@@ -1,17 +1,6 @@
-/*
-Description:
-    Contains all the styles for the winning wheel page.
-    
-Verison History:
-    2012-01-28, Douglas McKechie
-    - Created based off earlier version.
-    
-    2015-09-26, Douglas McKechie
-    - Minor updates for the 2.0 winwheel example.
-*/
 
 
-/* Sets the background image for the wheel */
+
 .roulette-background-image{
     position: absolute;
     width: 100%;
@@ -163,9 +152,9 @@ td.pw3
     background-color: rgb(202, 202, 202);
 }
 .test{
-    background-color: #dad8d8;
+    background-color: #eeeeeee7;
     background-color: #333333;
-    background-color: rgb(129, 252, 150);
+    background-color: rgb(99, 250, 124);
 
 }
 
