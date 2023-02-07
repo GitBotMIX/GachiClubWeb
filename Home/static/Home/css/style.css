@@ -124,6 +124,7 @@ body.modal-open {
     justify-content: center;
     align-items: center;
     display: flex;
+    padding: 30px;
 }
 .rating-crown{
     position: absolute;
@@ -144,6 +145,7 @@ body.modal-open {
 }
 .offcanvas-backdrop{
     overflow: hidden;
+    z-index: 150;
 }
 @media (min-width: 600px) {
   .rating-crown{

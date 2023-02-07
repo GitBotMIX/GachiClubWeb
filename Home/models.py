@@ -92,7 +92,7 @@ class UserQuests(models.Model):
 
 
 class UserProfileManager(models.Manager):
-    def add_points(self, user, points):
+    def add_points(self, user, points: str):
         if '-' in points:
             points = points.replace('-', '')
             return self.remove_points(user, points)
@@ -100,7 +100,7 @@ class UserProfileManager(models.Manager):
         user_profile.points += int(points)
         user_profile.save()
 
-    def remove_points(self, user, points):
+    def remove_points(self, user, points: str):
         if '-' in points:
             points = points.replace('-', '')
             return self.add_points(user, points)

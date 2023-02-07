@@ -13,7 +13,7 @@
   <div class="container row d-flex justify-content-center" style="margin: 0px; padding: 0px; width: 100%;">
     <div class="content col-12 col-sm-12 col-md-12 col-lg-6" style="padding: 0px">
       <div class="container rating">
-        <div class="card text-white bg-danger border-primary mb-3">
+        <div class="card text-white border-primary mb-3" style="background-color: #8a63a9;">
           <h3 class="card-header">Gachi Cup</h3>
           {% if gift %}
             {% if gift.unblocked %}
@@ -22,7 +22,7 @@
                 <h6 class="card-subtitle text-warning">{{ gift.name }}</h6>
               </div>
               <div class="container d-flex justify-content-center">
-                <img src="{{ gift.image.url }}" alt="Приз" style="height: 150px; width: 300px;">
+                <img src="{{ gift.image.url }}" alt="Приз" style="height: 150px; width: 275px;">
               </div>
             {% else %}
               <div class="card-body">

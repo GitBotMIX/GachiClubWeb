@@ -1,0 +1,724 @@
+{% extends "Home/base.html" %}
+{% load static %}
+{% block title %}
+    Gachi - Рулетка
+{% endblock %}
+
+{% block load_style %}
+<link rel="stylesheet" href="{% static 'roulette/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="modal_container" class="modal-container hide" style="z-index: 101;">
+    <div id="offcanvas_backdrop" onclick="hide_quest_modal()" class="offcanvas-backdrop fade show hide" style="z-index: 100;"></div>
+    <div class="modal-wrapper" style="z-index: 200;">
+        <div id="modal_quest" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+            <strong id="modal_title" class="me-auto">...</strong>
+            <small id="modal_reward"></small>
+            <button type="button" class="btn-close ms-2 mb-1" onclick="hide_quest_modal()" >
+            </button>
+            </div>
+            <p id="modal_description" class="toast-body">
+                <div id="challenge_load_text" class="container challenge-load-text">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                  </div>
+                </div>
+            </p>
+            <div id="modal_buttons" class="toast-footer d-flex justify-content-end p-1">
+                <button type="button" class="btn btn-primary btn-sm">Выполнить</button>
+                <button type="button" class="btn btn-secondary btn-sm">Не вывезу</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="roulette-card-container card mt-3">
+        <div class="roulette-background-image" style="background-image: url('{% static 'Home/img/Roulette_background2.png' %}');"></div>
+        <h3 class="card-header">Gachi Roulette</h3>
+        <div class="card-body">
+          <h5 class="card-title text-muted">Испытай удачу</h5>
+        </div>
+        <div class="card-body" style="padding: 0px;">
+
+                <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <div class="roulette-container">
+                            <img onClick="startSpin();" class="center-img" src="{% static 'roulette/img/roulette_center.png' %}" alt="">
+                            <canvas id="canvas" width="367" height="444">
+                                <p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
+                            </canvas>
+                            <img class="triangle-img" src="{% static 'roulette/img/triangle2.png' %}" alt="">
+                        </div>
+                    </tr>
+                </table>
+        </div>
+        <ul id="history_container" class="list-group list-group-flush">
+            {% if roulette_history %}
+                {% for history_item in roulette_history %}
+                    {% if history_item.is_completed_quest %}
+                        <li class='history-item list-group-item d-flex justify-content-between align-items-center'>
+                            {{ history_item.completed_quest.get_title }}
+                            <div class="">
+                                <span class="badge bg-primary rounded-pill"></span>
+                                <button class='btn p-0' onclick="quest_modal('{{ history_item.completed_quest.id }}')">
+                                <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                                </button>
+                            </div>
+                        </li>
+                    {% elif history_item.completed_quest.id == roulette_user_profile.quest_in_progress.id and forloop.counter ==  1 %}
+                    <li class='history-item list-group-item d-flex justify-content-between align-items-center completing'>
+                        {{ history_item.completed_quest.get_title }}
+                        <div class="">
+                            <span class="badge bg-primary rounded-pill"></span>
+                            <button class='btn p-0' onclick="quest_modal('{{ history_item.completed_quest.id }}', null, null, true)">
+                            <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                            </button>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class='history-item list-group-item d-flex justify-content-between align-items-center not-completed'>
+                        {{ history_item.completed_quest.get_title }}
+                        <div class="">
+                            <span class="badge bg-primary rounded-pill"></span>
+                            <button class='btn p-0' onclick="quest_modal('{{ history_item.completed_quest.id }}')">
+                            <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                            </button>
+                        </div>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item text-primary">Ты ещё ни разу не крутанул рулетку...</li>
+            {% endif %}
+            
+          </ul>
+        <div class="card-body d-flex">
+          <div id="total_quest_completed" class="card-link text-success">Выполнено: {{ roulette_user_profile.total_completed_quest }}</div>
+          <div id="total_quest_not_completed" class="card-link text-danger">Провалено: {{ roulette_user_profile.total_not_completed_quest }}</div>
+        </div>
+        <div id="total_spin" class="card-footer text-muted">
+          Прокручено: {{ roulette_user_profile.total_spin }} раз(а)
+        </div>
+      </div>
+
+{% endblock %}
+{% block js %}
+<script src='{% static "roulette/js/Winwheel.js" %}'></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+<script>
+    var old_segments_fill = [];
+    var is_first_rotate = true;
+    var challenge_load_text = document.getElementById('challenge_load_text')
+    var modal_container = document.getElementById('modal_container');
+    var modal_description = document.getElementById('modal_description');
+    var modal_title = document.getElementById('modal_title');
+    var modal_description = document.getElementById('modal_description');
+    var modal_reward = document.getElementById('modal_reward');
+    var modal_buttons = document.getElementById('modal_buttons');
+
+    function colorize_navbar_brand() {
+        navbar_brand = document.getElementById('navbar_brand');
+        navbar_brand.style.color = 'rgb(171, 250, 184)'
+    }
+
+    function modal_data_load() {
+        modal_description.textContent = ''
+        modal_title.textContent = '...'
+        modal_reward.textContent = ''
+        modal_buttons.classList.add('hide');
+        try {
+            challenge_load_text.classList.remove('hide')
+        } catch {}
+        
+    }
+    function modal_data_onload() {
+        challenge_load_text.classList.add('hide')
+        try{
+            modal_buttons.classList.remove('hide');
+        } catch {}
+        
+
+    }
+
+    function get_history_list(item_id) {
+        return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'get_history_list/',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+
+
+    function history_item_complete(liEl, quest_title, quest_id) {
+        liEl.innerHTML = `
+                            <p>${quest_title}</p>
+                            <div class="">
+                                <span class="badge bg-primary rounded-pill"></span>
+                                <button class='btn p-0' onclick="quest_modal('${quest_id}')">
+                                <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                                </button>
+                            </div>
+        
+        `
+    }
+
+    function history_item_not_completed(liEl, quest_title, quest_id) {
+        liEl.classList.add('not-completed')
+        liEl.innerHTML = `
+                        <p>${quest_title}</p>
+                        <div class="">
+                            <span class="badge bg-primary rounded-pill"></span>
+                            <button class='btn p-0' onclick="quest_modal('${quest_id}')">
+                            <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                            </button>
+                        </div>
+        `
+    }
+
+    function history_item_completing(liEl, quest_title, quest_id) {
+        liEl.classList.add('completing')
+        liEl.innerHTML = `
+                        <p>${quest_title}</p>
+                        <div class="">
+                            <span class="badge bg-primary rounded-pill"></span>
+                            <button class='btn p-0' onclick="quest_modal('${quest_id}', null, null, true)">
+                            <img class="rating-menu-icon" src="{% static 'Home/img/menu_icon.png' %}" alt="">
+                            </button>
+                        </div>
+        `
+    }
+
+    function update_roulette_user_data(total_quest_completed, total_quest_not_completed, total_spin) {
+        total_quest_completed_el = document.getElementById('total_quest_completed');
+        total_quest_not_completed_el = document.getElementById('total_quest_not_completed');
+        total_spin_el = document.getElementById('total_spin');
+
+        total_quest_completed_el.textContent = `Выполнено: ${total_quest_completed}`
+        total_quest_not_completed_el.textContent = `Провалено: ${total_quest_not_completed}`
+        total_spin_el.textContent = `Прокручено: ${total_spin} раз(а)`
+        
+
+    }
+
+    function update_history_list() {
+        get_history_list().then(function(data) {
+            console.log(data)
+            user_roulette_profile_data = data.user_profile_data
+            total_quest_completed = user_roulette_profile_data['total_quest_completed']
+            total_quest_not_completed = user_roulette_profile_data['total_quest_not_completed']
+            total_spin = user_roulette_profile_data['total_spin']
+            update_roulette_user_data(total_quest_completed, total_quest_not_completed, total_spin);
+
+            history_arr_all = data.roulette_history
+            history_container = document.getElementById('history_container');
+            history_container.replaceChildren()
+
+            for (let i = 0; i <= history_arr_all.length - 1; i++) {
+                history_arr = history_arr_all[i];
+                quest_id = history_arr['completed_quest__id']
+                quest_title = history_arr['completed_quest__title']
+                is_completed_quest = history_arr['is_completed_quest']
+                is_current_completing_quest = history_arr['is_current_completing_quest']
+                const liEl = document.createElement("li");
+                liEl.setAttribute("class", 'history-item list-group-item d-flex justify-content-between align-items-center');
+
+                if (is_completed_quest) {
+                    history_item_complete(liEl, quest_title, quest_id)
+                } else if (is_current_completing_quest) {
+                    history_item_completing(liEl, quest_title, quest_id)
+                   
+                } else {
+                    history_item_not_completed(liEl, quest_title, quest_id)
+                    
+                }
+                history_container.appendChild(liEl);
+
+            }
+            
+
+            
+
+        }).catch(function(error) {
+            // код, который будет выполнен в случае ошибки
+            console.log('to_do_quest: error')
+        });
+    }
+
+
+    function history_list_add(indicatedSegment) {
+        history_container = document.getElementById('history_container');
+
+    }
+
+    function get_history_list_items() {
+
+    }
+
+
+
+
+    function get_quest_data(item_id) {
+        return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'get_quest_data/',
+          data: {'item_id': item_id},
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+
+
+    function check_exist_completing_quest() {
+      return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'check_exist_completing_quest/',
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+    function to_do_quest(item_id) {
+      return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'to_do_quest/',
+          data: {'item_id': item_id},
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+    function request_fail_quest(item_id) {
+      return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'fail_quest/',
+          data: {'item_id': item_id},
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+
+    function fail_quest(item_id) {
+        request_fail_quest(item_id).then(function(data) {
+            console.log(data);
+            hide_quest_modal();
+            resetWheel();
+            update_history_list()
+            
+
+        }).catch(function(error) {
+            // код, который будет выполнен в случае ошибки
+            console.log('to_do_quest: error')
+        });
+    }
+
+    function request_perform_quest(item_id) {
+      return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'perform_quest/',
+          data: {'item_id': item_id},
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+
+    function perform_quest(item_id) {
+        request_perform_quest(item_id).then(function(data) {
+            console.log(data);
+            hide_quest_modal();
+            resetWheel();
+            update_history_list();
+            
+
+        }).catch(function(error) {
+            // код, который будет выполнен в случае ошибки
+            console.log('to_do_quest: error')
+        });
+    }
+
+    function hide_quest_modal() {
+        modal_container.classList.add('hide');
+        document.getElementById('offcanvas_backdrop').classList.add('hide');
+        document.body.classList.remove('modal-open');
+        
+    }
+
+    function show_quest_modal() {
+        modal_container.classList.remove('hide');
+        document.getElementById('offcanvas_backdrop').classList.remove('hide');
+        document.body.classList.add('modal-open');
+        
+    }
+
+    function change_modal_data(text, description, reward, item_id, background_color=null, buttons=true) {
+        modal_quest = document.getElementById('modal_quest');
+
+        if (background_color) {
+            modal_quest.style.backgroundColor = background_color;
+        } else {
+            modal_quest.style.backgroundColor = null;
+        }
+        modal_title.textContent = text
+        modal_description.textContent = description
+        modal_reward.textContent = `${reward} BUCKS`
+        if (buttons) {
+            
+            modal_buttons.innerHTML = `
+                <button type="button" class="btn btn-primary btn-sm" onclick="perform_quest(${item_id})">Выполнить</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="fail_quest(${item_id})">Не вывезу</button>
+            `
+        } else {
+            console.log('suc')
+            modal_buttons.innerHTML = `
+                Задание выполнено
+            `
+        }
+        modal_data_onload();
+
+
+    }
+
+    var modal_is_open;
+    function quest_modal(history_item_id, indicatedSegment=null, quest_is_not_completed=null, completing=null){
+        console.group('Modal');
+        console.log(`item_id: ${history_item_id}`);
+        console.groupEnd(); 
+        modal_data_load();    
+             
+
+        if (indicatedSegment) {
+            if (quest_is_not_completed) {background_color='#f7bec8'}else{background_color=null}
+            change_modal_data(indicatedSegment.text, indicatedSegment.description, indicatedSegment.reward, history_item_id, background_color)
+
+        } else {
+            get_quest_data(history_item_id).then(function(data) {
+                console.log(data);
+                quest_text = data['quest__title']
+                quest_description = data['quest__description']
+                quest_reward = data['quest__reward']
+                quest_id = data['quest__id']
+                console.log('completing ' + completing)      
+                if (completing) {
+                    change_modal_data(quest_text, quest_description, quest_reward, quest_id, null, true)
+                } else {
+                    change_modal_data(quest_text, quest_description, quest_reward, quest_id, null, false)
+                }   
+
+            }).catch(function(error) {
+                // код, который будет выполнен в случае ошибки
+                console.log('get_quest_data: ' + error)
+            });
+           
+        }
+        show_quest_modal();
+        
+        
+        
+    }
+     
+    let spin_audio = new Audio('{% static "roulette/sound/spin_music.mp3" %}');
+    let win_audio = new Audio('{% static "roulette/sound/ah.mp3" %}');  // Create audio object and load desired file.
+    // Create new wheel object specifying the parameters at creation time.
+    var theWheel = new Winwheel({
+        {% if roulette_items %}
+            'numSegments'   : {{ roulette_items_len }},
+        {% else %}
+            'numSegments'   : 6,
+        {% endif %}
+           // Specify number of segments.
+        'outerRadius'   : 180,  // Set radius to so wheel fits the background.
+        'innerRadius'   : 30,  // Set inner radius to make wheel hollow.
+        'textFontSize'  : 14,   // Set font size accordingly.
+        'textFontFamily': 'Sketch',
+        'textMargin'    : 0,
+        'lineWidth'     : 0,    // Take out default margin.
+        'segments'      :       // Define segments including colour and text.
+        [
+            {% if roulette_items %}
+                {% for roulette_item in roulette_items %}
+                    
+                    {% if forloop.counter|divisibleby:2 %}
+                        {'fillStyle': 'rgb(171, 250, 184)', 'text': '{{ roulette_item.get_title }}', 
+                        'reward': '{{ roulette_item.get_reward }}', 'item_id': '{{ roulette_item.id }}',
+                        'description': '{{ roulette_item.get_description }}'},
+                    {% else %}
+                        {'fillStyle': '#757575', 'text': '{{ roulette_item.get_title }}', 
+                        'reward': '{{ roulette_item.get_reward }}', 'item_id': '{{ roulette_item.id }}',
+                        'description': '{{ roulette_item.get_description }}'},
+                    {% endif %}
+
+                {% endfor %}
+            {% else %}
+                {'fillStyle' : 'rgb(171, 250, 184)', 'text' : 'Рулетка не заполнена', 'strokeStyle' : 'black'},
+                {'fillStyle' : '#757575', 'text' : 'Рулетка не заполнена', 'strokeStyle' : 'black'},
+                {'fillStyle' : 'rgb(171, 250, 184)', 'text' : 'Рулетка не заполнена', 'strokeStyle' : 'black'},
+                {'fillStyle' : '#757575', 'text' : 'Рулетка не заполнена', 'strokeStyle' : 'black'},
+                {'fillStyle' : 'rgb(171, 250, 184)', 'text' : 'Рулетка не заполнена', 'strokeStyle' : 'black'},
+                {'fillStyle' : '#757575', 'text' : 'Рулетка не заполнена', 'strokeStyle' : 'black'},
+            {% endif %}
+
+        ],
+        'pins' :    // Specify pin parameters.
+        {
+            {% if roulette_items %}
+                'number'   : {{ roulette_items_len }},
+            {% else %}
+                'number'   : 12,
+            {% endif %}
+            'outerRadius' : 0,
+            'margin'      : 0,
+            'fillStyle'   : '#000000',
+            'strokeStyle' : '#000000'
+        },
+        'animation' :           // Define spin to stop animation.
+        {
+            'type'     : 'spinToStop',
+            'duration' : 5,
+            'spins'    : 8,
+            // To do something after the animation has finished specify callback function.
+            'callbackFinished' : roulette_roll_finish
+
+        }
+    });
+
+
+    // Vars used by the code in this page to do power controls.
+    var theWheelOld = theWheel
+    var wheelPower    = 0;
+    var wheelSpinning = false;
+
+    function IndicatedSegment(text) {
+        this.text = text;
+    }
+
+    function spin_wheel() {
+        if (wheelSpinning == false)
+        {
+            theWheelOld.draw();
+            play_spin_sound();
+            theWheelOld.startAnimation();
+            wheelSpinning = true;
+        }
+    }
+
+    var quest_is_exist;
+    function startSpin()
+    {   
+        {% if gift %}
+            {% if gift.unblocked %}
+            {% else %}
+                return
+            {% endif %}
+        {% else %}
+            return
+        {% endif %}
+        check_exist_completing_quest().then(function(data) {
+            quest_is_exist = data['quest_is_exist']
+            if (quest_is_exist){
+                const indicatedSegment = new IndicatedSegment('data');
+                indicatedSegment.text = data['quest_in_progress__title']
+                indicatedSegment.description = data['quest_in_progress__description']
+                indicatedSegment.reward = data['quest_in_progress__reward']
+                indicatedSegment.item_id = data['quest_in_progress__id']
+                quest_modal(indicatedSegment.item_id, indicatedSegment, quest_is_not_completed=true);
+            } else {spin_wheel()}
+
+        }).catch(function(error) {
+            // код, который будет выполнен в случае ошибки
+            console.log('check_exist_completing_quest: ' + error)
+        });
+    }
+
+    // -------------------------------------------------------
+    // Function for reset button.
+    // -------------------------------------------------------
+    function resetWheel()
+    {
+        
+        theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
+        theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
+        for (let x = 1; x < old_segments_fill.length; x ++) {
+                //old_segments_fill.push(theWheel.segments[x].fillStyle)
+                theWheel.segments[x].fillStyle = old_segments_fill[x];
+            }
+        theWheel.draw();                // Call draw to render changes to the wheel.
+
+        wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+    }
+
+    // -------------------------------------------------------
+    // Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters.
+    // note the indicated segment is passed in as a parmeter as 99% of the time you will want to know this to inform the user of their prize.
+
+
+    function play_spin_sound() {
+        play_sound(spin_audio);
+    }
+
+    function play_win_sound() {
+        play_sound(win_audio);
+    }
+
+    function play_sound(audio)
+    {
+        // Stop and rewind the sound (stops it if already playing).
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = 0.1;
+
+        // Play the sound.
+        audio.play();
+    }
+
+    function wheel_write_log(indicatedSegment) {
+        console.group('Wheel')
+        console.log(indicatedSegment.text)
+        console.log(indicatedSegment.item_id)
+        console.log(indicatedSegment.reward)
+        console.groupEnd();
+    }
+
+
+    function to_do_quest(item_id, reward) {
+      return new Promise(function(resolve, reject) {$.ajax({
+          type: "POST",
+          url: 'to_do_quest/',
+          data: {'item_id': item_id, 'reward': reward},
+          dataType: 'json',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          success: function(data) {
+            //console.log(response.response)
+            
+            resolve(data);
+            
+          },
+          error: function(error) {
+              console.log(error);
+          }
+      })});
+    }
+
+
+    function roulette_roll_finish(indicatedSegment){
+        winAnimation();
+
+        wheel_write_log(indicatedSegment);
+
+        to_do_quest(indicatedSegment.item_id, indicatedSegment.reward).then(function(data) {
+            console.log(data);
+            update_history_list()
+            if (data.quest_is_exist) {
+                indicatedSegment.text = data['quest_in_progress__title']
+                indicatedSegment.description = data['quest_in_progress__description']
+                indicatedSegment.reward = data['quest_in_progress__reward']
+                quest_modal(indicatedSegment.item_id, indicatedSegment, quest_is_not_completed=true);
+
+            } else {
+                quest_modal(indicatedSegment.item_id, indicatedSegment);
+            }
+
+        }).catch(function(error) {
+            // код, который будет выполнен в случае ошибки
+            console.log('to_do_quest: error')
+        });
+
+        
+        
+    }
+
+    function winAnimation()
+        {
+            // Get the audio with the sound it in, then play.
+            // let winsound = document.getElementById('winsound');
+            // winsound.play();
+    
+            // Get the number of the winning segment.
+            spin_audio.pause();
+            play_win_sound();
+            let winningSegmentNumber = theWheel.getIndicatedSegmentNumber();
+    
+            // Loop and set fillStyle of all segments to gray.
+            if (is_first_rotate) {
+                for (let x = 1; x < theWheel.segments.length; x ++) {
+                old_segments_fill.push(theWheel.segments[x].fillStyle)
+                theWheel.segments[x].fillStyle = '#464646';
+                }
+            } else {
+                for (let x = 1; x < theWheel.segments.length; x ++) {
+                    theWheel.segments[x].fillStyle = '#464646';
+                }
+            }
+
+    
+            // Make the winning one yellow.
+            theWheel.segments[winningSegmentNumber].fillStyle = '#5dff78';
+    
+            // Call draw function to render changes.
+            console.log(old_segments_fill)
+            is_first_rotate = false;
+            theWheel.draw();
+        }
+
+    window.addEventListener('load', function() {
+        
+    })
+    colorize_navbar_brand();
+</script>
+{% endblock %}

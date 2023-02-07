@@ -1,0 +1,171 @@
+/*
+Description:
+    Contains all the styles for the winning wheel page.
+    
+Verison History:
+    2012-01-28, Douglas McKechie
+    - Created based off earlier version.
+    
+    2015-09-26, Douglas McKechie
+    - Minor updates for the 2.0 winwheel example.
+*/
+
+
+/* Sets the background image for the wheel */
+.roulette-background-image{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: 30px;
+    opacity: 7%;
+}
+.roulette-card-container{
+    background-color: #e5e5e5;
+}
+td.the_wheel
+{
+    position: absolute;
+    background-position: center;
+    background-repeat: none;
+}
+
+/* Do some css reset on selected elements */
+h1, p
+{
+    margin: 0;
+}
+
+div.power_controls
+{
+    margin-right:70px;
+}
+
+div.html5_logo
+{
+    margin-left:70px;
+}
+
+/* Styles for the power selection controls */
+table.power
+{
+    background-color: #cccccc;
+    cursor: pointer;
+    border:1px solid #333333;
+}
+
+table.power th
+{
+    background-color: white;
+    cursor: default;
+}
+
+td.pw1
+{
+    background-color: #6fe8f0;
+}
+
+td.pw2
+{
+    background-color: #86ef6f;
+}
+
+td.pw3
+{
+    background-color: #ef6f6f;
+}
+
+/* Style applied to the spin button once a power has been selected */
+.clickable
+{
+    cursor: pointer;
+}
+
+/* Other misc styles */
+.margin_bottom
+{
+    margin-bottom: 5px;
+}
+.canvas{
+    position: absolute;
+
+}
+.roulette-container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+.triangle-img{
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    top:10%;
+    left:50%;
+    transform:translate(-50%, -50%);
+}
+.center-img{
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+}
+.container-roulette-anchor{
+    overflow: hidden;
+    width: 345px;
+    height: 410px;
+    margin-top: 10px;
+}
+.roulette-wrapper{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.modal-container{
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
+}
+.modal-wrapper{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.btn-close::before {
+    position: static;
+    content: "X";
+}
+
+.history-item {
+    
+    background-color: rgb(171, 250, 184);
+}
+.not-completed{
+    background-color: rgb(247, 132, 132);
+}
+.completing{
+    background-color: rgb(202, 202, 202);
+}
+.test{
+    background-color: #dad8d8;
+    background-color: #333333;
+    background-color: rgb(129, 252, 150);
+
+}
+
