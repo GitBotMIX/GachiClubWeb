@@ -168,4 +168,12 @@ td.pw3
     background-color: rgb(129, 252, 150);
 
 }
+.roulette-canvas{
+    position: absolute;
+    background-color: red;
+}
+.canvas-anchor{
+    width: 367px;
+    height: 444px;
+}
 
