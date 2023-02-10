@@ -163,3 +163,21 @@ body.modal-open {
   }
 }
 
+.response-load-container {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    background-color: #fdfcfc86;
+    z-index: 1000;
+}
+
+.response-load {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

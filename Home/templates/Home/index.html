@@ -9,6 +9,14 @@
 {% block content %}
 <div id="offcanvas_backdrop" onclick="close_all_offcanvas()" class="offcanvas-backdrop fade show hide"></div>
 
+<div class="response-load-container hide" id="response_load_container">
+  <div class="response-load">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Загрузка...</span>
+    </div>
+  </div>
+</div>
+
 <div class="container">
   <div class="container row d-flex justify-content-center" style="margin: 0px; padding: 0px; width: 100%;">
     <div class="content col-12 col-sm-12 col-md-12 col-lg-6" style="padding: 0px">
@@ -183,10 +191,23 @@
 
 {% block js %}
   <script>
+    var response_load_container = document.getElementById('response_load_container');
     var current_sellect_category = document.getElementById('category-button-all');
     var current_difficulty_filter = null;
     var user_id_global;
     var offcanvas_is_open;
+
+    function response_load() {
+      if(response_load_container.classList.contains('hide')) {
+        response_load_container.classList.remove('hide')
+        document.body.classList.add('modal-open');
+      } else {
+        response_load_container.classList.add('hide')
+        document.body.classList.remove('modal-open');
+      }
+      
+    }
+
     function check_exist_completed_challenges(all_completed_challenges_length, all_full_completed_challenges_length) {
       if (all_completed_challenges_length + all_full_completed_challenges_length == 0){
         element_not_exist = document.getElementById('elements-not-exist')
@@ -208,6 +229,7 @@
     }
 
     function delete_previously_completed_quest(user_id, quest_id, el, reward) {
+      response_load();
       $.ajax({
           type: "POST",
           url: 'delete_task/',
@@ -217,6 +239,7 @@
           },
           dataType: 'json',
           success: function(response) {
+              response_load();
               console.log(response.status);
               //update_amount_completed_quest(quest_count_el);
               update_amount_completed_quest(el, delete_quest=true);
@@ -705,6 +728,7 @@
     };
 
     function perform_task(user_id, quest_id, quest_count_el, quest_reward, offcanvas_id=false){
+      response_load();
       $.ajax({
           type: "POST",
           url: 'perform_task/',
@@ -715,6 +739,7 @@
           dataType: 'json',
           success: function(response) {
               console.log(response.status);
+              response_load();
 
               if (offcanvas_id) {
                 close_all_offcanvas();
